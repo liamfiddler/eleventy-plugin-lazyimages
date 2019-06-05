@@ -1,6 +1,6 @@
 # Lazy image loader plugin for 11ty
 
->An 11ty plugin that adds lazy loading to your images
+>An 11ty plugin that scans for images in your markup, adds the correct width and height attributes to the tag, defers loading of the image until it is in the viewport (lazy loading), and generates + displays a blurry low-res placeholder until the image loads.
 
 ## Getting started
 
