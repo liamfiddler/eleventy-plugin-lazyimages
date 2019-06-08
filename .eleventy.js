@@ -3,16 +3,18 @@ const Jimp = require('jimp');
 
 const lazyImagesCache = new Map();
 
+// FIXME: add a way for the user to override these
 const lazyImagesConfig = {
   maxPlaceholderWidth: 12,
   maxPlaceholderHeight: 12,
   placeholderQuality: 60,
   lazyLoadSrc: 'https://cdnjs.cloudflare.com/ajax/libs/lazysizes/4.1.8/lazysizes.min.js',
   imgQuery: 'img[src^="/"]',
+  useInMemoryCache: true,
 };
 
 const getImageData = async imageSrc => {
-  if (lazyImagesCache.has(imageSrc)) {
+  if (lazyImagesConfig.useInMemoryCache && lazyImagesCache.has(imageSrc)) {
     return lazyImagesCache.get(imageSrc);
   }
 
@@ -34,7 +36,9 @@ const getImageData = async imageSrc => {
     src: encoded,
   };
 
-  lazyImagesCache.set(imageSrc, imageData);
+  if (lazyImagesConfig.useInMemoryCache) {
+    lazyImagesCache.set(imageSrc, imageData);
+  }
 
   return imageData;
 };
