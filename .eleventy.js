@@ -28,8 +28,6 @@ const getImageData = async imageSrc => {
     return lazyImagesCache.get(imageSrc);
   }
 
-  console.log('LazyImages Plugin - Processing', imageSrc);
-
   const image = await Jimp.read(imageSrc);
   const width = image.bitmap.width;
   const height = image.bitmap.height;
@@ -51,6 +49,25 @@ const getImageData = async imageSrc => {
   }
 
   return imageData;
+};
+
+const processImage = async imgElem => {
+  const { transformImgPath, className } = lazyImagesConfig;
+  const imgPath = transformImgPath(imgElem.src);
+
+  imgElem.setAttribute('loading', 'lazy');
+  imgElem.setAttribute('data-src', imgElem.src);
+  imgElem.classList.add(className);
+
+  try {
+    const image = await getImageData(imgPath);
+
+    imgElem.setAttribute('width', image.width);
+    imgElem.setAttribute('height', image.height);
+    imgElem.setAttribute('src', image.src);
+  } catch (e) {
+    console.error('LazyImages plugin', imgPath, e);
+  }
 };
 
 // Have to use lowest common denominator JS language features here
@@ -86,7 +103,6 @@ module.exports = {
 
     const {
       imgQuery,
-      transformImgPath,
       className,
       appendInitScript,
       scriptSrc,
@@ -99,27 +115,10 @@ module.exports = {
 
         if (outputPath.endsWith('.html')) {
           const dom = new JSDOM(content);
-          const images = dom.window.document.querySelectorAll(imgQuery);
-          const numImages = images.length;
+          const images = [...dom.window.document.querySelectorAll(imgQuery)];
 
-          if (numImages > 0) {
-            for (let i = 0; i < numImages; i++) {
-              const src = transformImgPath(images[i].src);
-
-              images[i].setAttribute('loading', 'lazy');
-              images[i].setAttribute('data-src', images[i].src);
-              images[i].classList.add(className);
-
-              try {
-                const image = await getImageData(src);
-
-                images[i].setAttribute('width', image.width);
-                images[i].setAttribute('height', image.height);
-                images[i].setAttribute('src', image.src);
-              } catch (e) {
-                console.error('LazyImages Plugin - Error', src, e);
-              }
-            }
+          if (images.length > 0) {
+            await Promise.all(images.map(processImage));
 
             if (appendInitScript) {
               dom.window.document.body.insertAdjacentHTML(
