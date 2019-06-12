@@ -1,20 +1,30 @@
 const { JSDOM } = require('jsdom');
 const Jimp = require('jimp');
 
-const lazyImagesCache = new Map();
-
-// FIXME: add a way for the user to override these
-const lazyImagesConfig = {
+const defaultLazyImagesConfig = {
   maxPlaceholderWidth: 12,
   maxPlaceholderHeight: 12,
   placeholderQuality: 60,
-  lazyLoadSrc: 'https://cdnjs.cloudflare.com/ajax/libs/lazysizes/4.1.8/lazysizes.min.js',
   imgQuery: 'img[src^="/"]',
-  useInMemoryCache: true,
+  transformImgPath: src => `.${src}`,
+  className: 'lazyload',
+  cache: true,
+  appendInitScript: true,
+  scriptSrc: 'https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js',
 };
 
+let lazyImagesConfig = defaultLazyImagesConfig;
+const lazyImagesCache = new Map();
+
 const getImageData = async imageSrc => {
-  if (lazyImagesConfig.useInMemoryCache && lazyImagesCache.has(imageSrc)) {
+  const {
+    maxPlaceholderWidth,
+    maxPlaceholderHeight,
+    placeholderQuality,
+    cache,
+  } = lazyImagesConfig;
+
+  if (cache && lazyImagesCache.has(imageSrc)) {
     return lazyImagesCache.get(imageSrc);
   }
 
@@ -25,8 +35,8 @@ const getImageData = async imageSrc => {
   const height = image.bitmap.height;
 
   const resized = image
-    .scaleToFit(lazyImagesConfig.maxPlaceholderWidth, lazyImagesConfig.maxPlaceholderHeight)
-    .quality(lazyImagesConfig.placeholderQuality);
+    .scaleToFit(maxPlaceholderWidth, maxPlaceholderHeight)
+    .quality(placeholderQuality);
 
   const encoded = await resized.getBase64Async(Jimp.MIME_JPEG);
 
@@ -36,7 +46,7 @@ const getImageData = async imageSrc => {
     src: encoded,
   };
 
-  if (lazyImagesConfig.useInMemoryCache) {
+  if (cache) {
     lazyImagesCache.set(imageSrc, imageData);
   }
 
@@ -45,9 +55,9 @@ const getImageData = async imageSrc => {
 
 // Have to use lowest common denominator JS language features here
 // because we don't know what the target browser support is
-const initLazyImages = function() {
+const initLazyImages = function(selector, src) {
   if ('loading' in HTMLImageElement.prototype) {
-    var images = document.querySelectorAll('img.lazyload');
+    var images = document.querySelectorAll(selector);
     var numImages = images.length;
 
     if (numImages > 0) {
@@ -61,46 +71,74 @@ const initLazyImages = function() {
 
   var script = document.createElement('script');
   script.async = true;
-  script.src = lazyImagesConfig.lazyLoadSrc;
-  document.body.appendChild(script); // FIXME: how to use query selector here?
+  script.src = src;
+  document.body.appendChild(script);
 };
 
-module.exports = eleventyConfig => {
-  eleventyConfig.addTransform('lazyimages', async (rawContent, outputPath) => {
-    let content = rawContent;
+module.exports = {
+  initArguments: {},
+  configFunction: (eleventyConfig, pluginOptions = {}) => {
+    lazyImagesConfig = Object.assign(
+      {},
+      defaultLazyImagesConfig,
+      pluginOptions
+    );
 
-    if (outputPath.endsWith('.html')) {
-      const dom = new JSDOM(content);
-      const images = dom.window.document.querySelectorAll(lazyImagesConfig.imgQuery);
+    const {
+      imgQuery,
+      transformImgPath,
+      className,
+      appendInitScript,
+      scriptSrc,
+    } = lazyImagesConfig;
 
-      if (images.length) {
-        for (let i = 0, numImages = images.length; i < numImages; i++) {
-          const src = `.${images[i].src}`; // FIXME: this path is too specific
+    eleventyConfig.addTransform(
+      'lazyimages',
+      async (rawContent, outputPath) => {
+        let content = rawContent;
 
-          images[i].setAttribute('loading', 'lazy');
-          images[i].setAttribute('data-src', images[i].src);
-          images[i].classList.add('lazyload');
+        if (outputPath.endsWith('.html')) {
+          const dom = new JSDOM(content);
+          const images = dom.window.document.querySelectorAll(imgQuery);
+          const numImages = images.length;
 
-          try {
-            const image = await getImageData(src);
+          if (numImages > 0) {
+            for (let i = 0; i < numImages; i++) {
+              const src = transformImgPath(images[i].src);
 
-            images[i].setAttribute('width', image.width);
-            images[i].setAttribute('height', image.height);
-            images[i].setAttribute('src', image.src);
-          } catch (e) {
-            console.error('Error', src, e);
+              images[i].setAttribute('loading', 'lazy');
+              images[i].setAttribute('data-src', images[i].src);
+              images[i].classList.add(className);
+
+              try {
+                const image = await getImageData(src);
+
+                images[i].setAttribute('width', image.width);
+                images[i].setAttribute('height', image.height);
+                images[i].setAttribute('src', image.src);
+              } catch (e) {
+                console.error('LazyImages Plugin - Error', src, e);
+              }
+            }
+
+            if (appendInitScript) {
+              dom.window.document.body.insertAdjacentHTML(
+                'beforeend',
+                `<script>
+                (${initLazyImages.toString()})(
+                  'img.${className}',
+                  '${scriptSrc}',
+                );
+              </script>`
+              );
+            }
+
+            content = dom.serialize();
           }
         }
 
-        dom.window.document.body.insertAdjacentHTML(
-          'beforeend',
-          `<script>(${initLazyImages.toString()})();</script>`
-        );
-
-        content = dom.serialize();
+        return content;
       }
-    }
-
-    return content;
-  });
+    );
+  },
 };
