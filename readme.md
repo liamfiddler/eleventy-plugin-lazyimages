@@ -54,8 +54,8 @@ A full list of available configuration options are listed below.
 
 | Key | Type | Description |
 |--|--|--|
-| `maxPlaceholderWidth` | Integer | The maximum width of the generated placeholder image.<br>Default: `12` |
-| `maxPlaceholderHeight` | Integer | The maximum height of the generated placeholder image.<br>Default: `12` |
+| `maxPlaceholderWidth` | Integer | The maximum width in pixels of the generated placeholder image. Recommended values are between 6 and 15.<br>Default: `12` |
+| `maxPlaceholderHeight` | Integer | The maximum height in pixels of the generated placeholder image. Recommended values are between 6 and 15.<br>Default: `12` |
 | `placeholderQuality` | Integer | The JPEG compression quality of the generated placeholder image.<br>Default: `60` |
 | `imgQuery` | String | The DOM selector used to find IMG elements in the markup.<br>Default: `img[src^="/"]` |
 | `transformImgPath` | Function | A function that takes the IMG `src` attribute and returns a string representing the local path to your image.<br>Default: ``` src => `.${src}` ``` |
