@@ -88,4 +88,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 * The wonderfully supportive team at [Mentally Friendly](https://mentallyfriendly.com)
 * Everyone who has contributed to the [11ty](https://www.11ty.io/) project, without whom this plugin wouldn't run
-* [Addy Osmani's blog post about lazy loading] (https://addyosmani.com/blog/lazy-loading/) which served as the inspiration for the init script
+* [Addy Osmani's blog post about lazy loading](https://addyosmani.com/blog/lazy-loading/) which served as the inspiration for the init script
