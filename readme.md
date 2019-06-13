@@ -38,7 +38,7 @@ img {
   height: auto;
 }
 ```
-The above CSS will ensure the image is never wider than it's container and the aspect ratio is maintained.
+The above CSS will ensure the image is never wider than its container and the aspect ratio is maintained.
 
 ### Configure the plugin (optional)
 
