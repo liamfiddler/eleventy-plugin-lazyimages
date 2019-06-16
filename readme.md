@@ -8,6 +8,7 @@ A plugin for [11ty](https://www.11ty.io/) that:
 
 This plugin supports:
 - Any 11ty template format that outputs to a .html file
+- Absolute and relative image paths
 - Custom image selectors; target all images or only images in a certain part
   of the page
 - Placeholder generation for all image formats supported by
@@ -66,12 +67,12 @@ A full list of available configuration options are listed below.
 | `maxPlaceholderWidth` | Integer | The maximum width in pixels of the generated placeholder image. Recommended values are between 6 and 15.<br>Default: `12` |
 | `maxPlaceholderHeight` | Integer | The maximum height in pixels of the generated placeholder image. Recommended values are between 6 and 15.<br>Default: `12` |
 | `placeholderQuality` | Integer | The JPEG compression quality of the generated placeholder image.<br>Default: `60` |
-| `imgQuery` | String | The DOM selector used to find IMG elements in the markup.<br>Default: `img[src^="/"]` |
-| `transformImgPath` | Function | A function that takes the IMG `src` attribute and returns a string representing the local path to your image.<br>Default: ``` src => `.${src}` ``` |
-| `className` | String | The class name added to found IMG elements. Do not change this value unless you intend to use your own `scriptSrc` configuration.<br>Default: `lazyload` |
+| `imgQuery` | String | The DOM selector used to find IMG elements in the markup.<br>Default: `img` |
+| `transformImgPath` | Function | A function that takes the IMG `src` attribute and returns a string representing the actual path to your image.<br>Default: `src => { /* returns the absolute path for network images and a relative path for local images */ }` |
 | `cache` | Boolean | Store the results of expensive image reads in memory. Uses more memory, but greatly speeds up processing of images that appear in the markup multiple times or when using `eleventy --serve` / `eleventy --watch`.<br>Default: `true` |
 | `appendInitScript` | Boolean | Appends code to initialise lazy loading of images to the generated markup. Set this to `false` if you include your own lazy load script.<br>Default: `true` |
 | `scriptSrc` | String | The URI for the lazy load script that is injected into the markup via `appendInitScript`.<br>Default: `https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js` |
+| `className` | String | The class name added to found IMG elements. Do not change this value unless you intend to use your own `scriptSrc`.<br>Default: `lazyload` |
 
 ## Built with
 

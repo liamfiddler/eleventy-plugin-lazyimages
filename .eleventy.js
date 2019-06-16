@@ -1,12 +1,20 @@
 const { JSDOM } = require('jsdom');
 const Jimp = require('jimp');
 
+const transformImgPath = (src) => {
+  if (src.startsWith('/') && !src.startsWith('//')) {
+    return `.${src}`;
+  }
+
+  return src;
+};
+
 const defaultLazyImagesConfig = {
   maxPlaceholderWidth: 12,
   maxPlaceholderHeight: 12,
   placeholderQuality: 60,
-  imgQuery: 'img[src^="/"]',
-  transformImgPath: src => `.${src}`,
+  imgQuery: 'img',
+  transformImgPath,
   className: 'lazyload',
   cache: true,
   appendInitScript: true,
