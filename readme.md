@@ -76,13 +76,13 @@ A full list of available configuration options are listed below.
 | `scriptSrc` | String | The URI for the lazy load script that is injected into the markup via `appendInitScript`.<br>Default: `https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js` |
 | `className` | String | The class name added to found IMG elements. Do not change this value unless you intend to use your own `scriptSrc`.<br>Default: `lazyload` |
 
-## Demo projects
+## Example projects
 
-Demo projects using the plugin can be found in the 
-[`/demo`](./demo) directory.
+Example projects using the plugin can be found in the 
+[`/example`](./example) directory.
 
-- [Basic](./demo/basic) - using default configuration
-- [Custom selector](./demo/custom-selector) - using a custom image
+- [Basic](./example/basic) - using default configuration
+- [Custom selector](./example/custom-selector) - using a custom image
   selector to only target image in certain DIVs
 
 ## Built with
