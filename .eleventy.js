@@ -59,6 +59,12 @@ const processImage = async imgElem => {
   imgElem.setAttribute('data-src', imgElem.src);
   imgElem.classList.add(className);
 
+  if (imgElem.hasAttribute('srcset')) {
+    const srcSet = imgElem.getAttribute('srcset');
+    imgElem.setAttribute('data-srcset', srcSet);
+    imgElem.removeAttribute('srcset');
+  }
+
   try {
     const image = await getImageData(imgPath);
 
