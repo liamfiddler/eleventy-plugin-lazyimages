@@ -24,6 +24,10 @@ const defaultLazyImagesConfig = {
 let lazyImagesConfig = defaultLazyImagesConfig;
 const lazyImagesCache = new Map();
 
+const logMessage = (message) => {
+  console.log(`LazyImages - ${message}`);
+};
+
 const getImageData = async imageSrc => {
   const {
     maxPlaceholderWidth,
@@ -35,6 +39,8 @@ const getImageData = async imageSrc => {
   if (cache && lazyImagesCache.has(imageSrc)) {
     return lazyImagesCache.get(imageSrc);
   }
+
+  logMessage(`started processing ${imageSrc}`);
 
   const image = await Jimp.read(imageSrc);
   const width = image.bitmap.width;
@@ -56,6 +62,7 @@ const getImageData = async imageSrc => {
     lazyImagesCache.set(imageSrc, imageData);
   }
 
+  logMessage(`finished processing ${imageSrc}`);
   return imageData;
 };
 
@@ -115,7 +122,9 @@ const transformMarkup = async (rawContent, outputPath) => {
     const images = [...dom.window.document.querySelectorAll(imgSelector)];
 
     if (images.length > 0) {
+      logMessage(`found ${images.length} images in ${outputPath}`);
       await Promise.all(images.map(processImage));
+      logMessage(`processed ${images.length} images in ${outputPath}`);
 
       if (appendInitScript) {
         dom.window.document.body.insertAdjacentHTML(

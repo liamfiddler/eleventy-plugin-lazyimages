@@ -48,14 +48,16 @@ img {
   height: auto;
 }
 ```
-The above CSS will ensure the image is never wider than its container and the aspect ratio is maintained.
+The above CSS will ensure the image is never wider than its 
+container and the aspect ratio is maintained.
 
 ### Configure the plugin (optional)
 
-You can pass an object with configuration options as the second parameter:
+You can pass an object with configuration options as the second 
+parameter:
 ```js
 eleventyConfig.addPlugin(lazyImagesPlugin, {
-  // Your config goes here
+  imgSelector: '.post-content img', // custom image selector
 });
 ```
 A full list of available configuration options are listed below.
@@ -68,16 +70,27 @@ A full list of available configuration options are listed below.
 | `maxPlaceholderHeight` | Integer | The maximum height in pixels of the generated placeholder image. Recommended values are between 6 and 15.<br>Default: `12` |
 | `placeholderQuality` | Integer | The JPEG compression quality of the generated placeholder image.<br>Default: `60` |
 | `imgSelector` | String | The DOM selector used to find IMG elements in the markup.<br>Default: `img` |
-| `transformImgPath` | Function | A function that takes the IMG `src` attribute and returns a string representing the actual path to your image.<br>Default: `src => { /* returns the absolute path for network images and a relative path for local images */ }` |
+| `transformImgPath` | Function | A function that takes the IMG `src` attribute and returns a string representing the actual path to your image. |
 | `cache` | Boolean | Store the results of expensive image reads in memory. Uses more memory, but greatly speeds up processing of images that appear in the markup multiple times or when using `eleventy --serve` / `eleventy --watch`.<br>Default: `true` |
 | `appendInitScript` | Boolean | Appends code to initialise lazy loading of images to the generated markup. Set this to `false` if you include your own lazy load script.<br>Default: `true` |
 | `scriptSrc` | String | The URI for the lazy load script that is injected into the markup via `appendInitScript`.<br>Default: `https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js` |
 | `className` | String | The class name added to found IMG elements. Do not change this value unless you intend to use your own `scriptSrc`.<br>Default: `lazyload` |
 
+## Demo projects
+
+Demo projects using the plugin can be found in the 
+[`/demo`](./demo) directory.
+
+- [Basic](./demo/basic) - using default configuration
+- [Custom selector](./demo/custom-selector) - using a custom image
+  selector to only target image in certain DIVs
+
 ## Built with
 
-* [JSDOM](https://github.com/jsdom/jsdom) - To find and modify image elements in 11ty's generated markup
-* [JIMP](https://github.com/oliver-moran/jimp) - To read image metadata and generate low-res placeholders
+* [JSDOM](https://github.com/jsdom/jsdom) - To find and modify image
+  elements in 11ty's generated markup
+* [JIMP](https://github.com/oliver-moran/jimp) - To read image
+  metadata and generate low-res placeholders
 * [LazySizes](https://github.com/aFarkas/lazysizes) - Handles lazy loading
 
 ## Contributing
@@ -88,14 +101,21 @@ This project welcomes suggestions and Pull Requests!
 
 * **Liam Fiddler** - *Initial work* - [@liamfiddler](https://github.com/liamfiddler)
 
-See also the list of [contributors](https://github.com/liamfiddler/eleventy-plugin-lazyimages/contributors) who participated in this project.
+See also the list of 
+[contributors](https://github.com/liamfiddler/eleventy-plugin-lazyimages/contributors) 
+who participated in this project.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+This project is licensed under the MIT License - 
+see the [LICENSE](LICENSE) file for details
 
 ## Acknowledgments
 
-* The wonderfully supportive team at [Mentally Friendly](https://mentallyfriendly.com)
-* Everyone who has contributed to the [11ty](https://www.11ty.io/) project, without whom this plugin wouldn't run
-* [Addy Osmani's blog post about lazy loading](https://addyosmani.com/blog/lazy-loading/) which served as the inspiration for the init script
+* The wonderfully supportive team at 
+  [Mentally Friendly](https://mentallyfriendly.com)
+* Everyone who has contributed to the 
+  [11ty](https://www.11ty.io/) project, without whom 
+  this plugin wouldn't run
+* [Addy Osmani's blog post about lazy loading](https://addyosmani.com/blog/lazy-loading/) 
+  which served as the inspiration for the init script
