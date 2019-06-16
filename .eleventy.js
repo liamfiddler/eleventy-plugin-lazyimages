@@ -98,6 +98,36 @@ const initLazyImages = function(selector, src) {
   document.body.appendChild(script);
 };
 
+const transformMarkup = async (rawContent, outputPath) => {
+  const { imgQuery, className, appendInitScript, scriptSrc } = lazyImagesConfig;
+  let content = rawContent;
+
+  if (outputPath.endsWith('.html')) {
+    const dom = new JSDOM(content);
+    const images = [...dom.window.document.querySelectorAll(imgQuery)];
+
+    if (images.length > 0) {
+      await Promise.all(images.map(processImage));
+
+      if (appendInitScript) {
+        dom.window.document.body.insertAdjacentHTML(
+          'beforeend',
+          `<script>
+            (${initLazyImages.toString()})(
+              'img.${className}',
+              '${scriptSrc}',
+            );
+          </script>`
+        );
+      }
+
+      content = dom.serialize();
+    }
+  }
+
+  return content;
+};
+
 module.exports = {
   initArguments: {},
   configFunction: (eleventyConfig, pluginOptions = {}) => {
@@ -107,43 +137,6 @@ module.exports = {
       pluginOptions
     );
 
-    const {
-      imgQuery,
-      className,
-      appendInitScript,
-      scriptSrc,
-    } = lazyImagesConfig;
-
-    eleventyConfig.addTransform(
-      'lazyimages',
-      async (rawContent, outputPath) => {
-        let content = rawContent;
-
-        if (outputPath.endsWith('.html')) {
-          const dom = new JSDOM(content);
-          const images = [...dom.window.document.querySelectorAll(imgQuery)];
-
-          if (images.length > 0) {
-            await Promise.all(images.map(processImage));
-
-            if (appendInitScript) {
-              dom.window.document.body.insertAdjacentHTML(
-                'beforeend',
-                `<script>
-                (${initLazyImages.toString()})(
-                  'img.${className}',
-                  '${scriptSrc}',
-                );
-              </script>`
-              );
-            }
-
-            content = dom.serialize();
-          }
-        }
-
-        return content;
-      }
-    );
+    eleventyConfig.addTransform('lazyimages', transformMarkup);
   },
 };
