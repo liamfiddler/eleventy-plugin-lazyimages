@@ -13,7 +13,7 @@ const defaultLazyImagesConfig = {
   maxPlaceholderWidth: 12,
   maxPlaceholderHeight: 12,
   placeholderQuality: 60,
-  imgQuery: 'img',
+  imgSelector: 'img',
   transformImgPath,
   className: 'lazyload',
   cache: true,
@@ -107,12 +107,12 @@ const initLazyImages = function(selector, src) {
 };
 
 const transformMarkup = async (rawContent, outputPath) => {
-  const { imgQuery, className, appendInitScript, scriptSrc } = lazyImagesConfig;
+  const { imgSelector, appendInitScript, scriptSrc } = lazyImagesConfig;
   let content = rawContent;
 
   if (outputPath.endsWith('.html')) {
     const dom = new JSDOM(content);
-    const images = [...dom.window.document.querySelectorAll(imgQuery)];
+    const images = [...dom.window.document.querySelectorAll(imgSelector)];
 
     if (images.length > 0) {
       await Promise.all(images.map(processImage));
@@ -122,7 +122,7 @@ const transformMarkup = async (rawContent, outputPath) => {
           'beforeend',
           `<script>
             (${initLazyImages.toString()})(
-              'img.${className}',
+              '${imgSelector}',
               '${scriptSrc}',
             );
           </script>`
