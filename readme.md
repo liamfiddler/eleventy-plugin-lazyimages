@@ -6,6 +6,15 @@ A plugin for [11ty](https://www.11ty.io/) that:
 3. Defers loading of the image until it is in/near the viewport (lazy loading)
 4. Generates + displays a blurry low-res placeholder until the image has loaded
 
+This plugin supports:
+- Any 11ty template format that outputs to a .html file
+- Custom image selectors; target all images or only images in a certain part
+  of the page
+- Placeholder generation for all image formats supported by
+  [JIMP](https://github.com/oliver-moran/jimp); BMP, GIF, JPEG, PNG, & TIFF
+- Responsive images using `srcset`; the image in the `src` attribute will be
+  used for determining the placeholder image and width/height attributes
+
 ## Getting started
 
 ### Install the plugin
