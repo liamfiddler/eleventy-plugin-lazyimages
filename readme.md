@@ -1,6 +1,4 @@
-# Lazy image loader plugin for 11ty
-
-A plugin for [11ty](https://www.11ty.io/) that:
+# LazyImages plugin for [11ty](https://www.11ty.io/)
 
 🔍 Finds IMG elements in your markup
 
@@ -35,7 +33,6 @@ const lazyImagesPlugin = require('eleventy-plugin-lazyimages');
 
 module.exports = function(eleventyConfig) {
   eleventyConfig.addPlugin(lazyImagesPlugin);
-  // ...
 };
 ```
 
@@ -62,6 +59,7 @@ parameter:
 ```js
 eleventyConfig.addPlugin(lazyImagesPlugin, {
   imgSelector: '.post-content img', // custom image selector
+  cacheFile: '', // don't cache results to a file
 });
 ```
 A full list of available configuration options are listed below.
@@ -75,7 +73,7 @@ A full list of available configuration options are listed below.
 | `placeholderQuality` | Integer | The JPEG compression quality of the generated placeholder image.<br>Default: `60` |
 | `imgSelector` | String | The DOM selector used to find IMG elements in the markup.<br>Default: `img` |
 | `transformImgPath` | Function | A function that takes the IMG `src` attribute and returns a string representing the actual path to your image. |
-| `cache` | Boolean | Store the results of expensive image reads in memory. Uses more memory, but greatly speeds up processing of images that appear in the markup multiple times or when using `eleventy --serve` / `eleventy --watch`.<br>Default: `true` |
+| `cacheFile` | String | Cache image metadata and placeholder images to this filename. Greatly speeds up subsequent builds. Pass an empty string to turn off the cache.<br>Default: `.lazyimages.json` |
 | `appendInitScript` | Boolean | Appends code to initialise lazy loading of images to the generated markup. Set this to `false` if you include your own lazy load script.<br>Default: `true` |
 | `scriptSrc` | String | The URI for the lazy load script that is injected into the markup via `appendInitScript`.<br>Default: `https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js` |
 | `className` | String | The class name added to found IMG elements. Do not change this value unless you intend to use your own `scriptSrc`.<br>Default: `lazyload` |

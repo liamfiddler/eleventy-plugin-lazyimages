@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { JSDOM } = require('jsdom');
 const Jimp = require('jimp');
 
@@ -16,16 +17,56 @@ const defaultLazyImagesConfig = {
   imgSelector: 'img',
   transformImgPath,
   className: 'lazyload',
-  cache: true,
+  cacheFile: '.lazyimages.json',
   appendInitScript: true,
   scriptSrc: 'https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js',
 };
 
 let lazyImagesConfig = defaultLazyImagesConfig;
-const lazyImagesCache = new Map();
+let lazyImagesCache = {};
 
 const logMessage = (message) => {
   console.log(`LazyImages - ${message}`);
+};
+
+const loadCache = () => {
+  const { cacheFile } = lazyImagesConfig;
+
+  if (!cacheFile) {
+    return;
+  }
+
+  try {
+    if (fs.existsSync(cacheFile)) {
+      const cachedData = fs.readFileSync(cacheFile, 'utf8');
+      lazyImagesCache = JSON.parse(cachedData);
+    }
+  } catch(e) {
+    console.error('LazyImages: cacheFile', e);
+  }
+};
+
+const readCache = (imageSrc) => {
+  if (imageSrc in lazyImagesCache) {
+    return lazyImagesCache[imageSrc];
+  }
+
+  return undefined;
+};
+
+const updateCache = (imageSrc, imageData) => {
+  const { cacheFile } = lazyImagesConfig;
+  lazyImagesCache[imageSrc] = imageData;
+
+  if (cacheFile) {
+    const cacheData = JSON.stringify(lazyImagesCache);
+
+    fs.writeFile(cacheFile, cacheData, (err) => {  
+      if (err) {
+        console.error('LazyImages: cacheFile', e);
+      }
+    });
+  }
 };
 
 const getImageData = async imageSrc => {
@@ -33,11 +74,12 @@ const getImageData = async imageSrc => {
     maxPlaceholderWidth,
     maxPlaceholderHeight,
     placeholderQuality,
-    cache,
   } = lazyImagesConfig;
 
-  if (cache && lazyImagesCache.has(imageSrc)) {
-    return lazyImagesCache.get(imageSrc);
+  let imageData = readCache(imageSrc);
+
+  if (imageData) {
+    return imageData;
   }
 
   logMessage(`started processing ${imageSrc}`);
@@ -52,17 +94,14 @@ const getImageData = async imageSrc => {
 
   const encoded = await resized.getBase64Async(Jimp.MIME_JPEG);
 
-  const imageData = {
+  imageData = {
     width,
     height,
     src: encoded,
   };
 
-  if (cache) {
-    lazyImagesCache.set(imageSrc, imageData);
-  }
-
   logMessage(`finished processing ${imageSrc}`);
+  updateCache(imageSrc, imageData);
   return imageData;
 };
 
@@ -87,7 +126,7 @@ const processImage = async imgElem => {
     imgElem.setAttribute('height', image.height);
     imgElem.setAttribute('src', image.src);
   } catch (e) {
-    console.error('LazyImages plugin', imgPath, e);
+    console.error('LazyImages', imgPath, e);
   }
 };
 
@@ -154,6 +193,7 @@ module.exports = {
       pluginOptions
     );
 
+    loadCache();
     eleventyConfig.addTransform('lazyimages', transformMarkup);
   },
 };
