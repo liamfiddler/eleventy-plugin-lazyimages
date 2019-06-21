@@ -1,6 +1,6 @@
 # LazyImages plugin for [11ty](https://www.11ty.io/)
 
-![Example](./example.jpg)
+![Banner image](https://repository-images.githubusercontent.com/190408612/4305b000-94d2-11e9-922c-72a93cafadcf)
 
 🔍 Finds IMG elements in your markup
 
