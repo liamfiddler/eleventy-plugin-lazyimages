@@ -60,3 +60,6 @@ typings/
 # build output
 .next
 _site
+
+# other junk
+.DS_Store
