@@ -1,5 +1,7 @@
 # LazyImages plugin for [11ty](https://www.11ty.io/)
 
+![Example](./example.jpg)
+
 🔍 Finds IMG elements in your markup
 
 💉 Injects the source image width and height attributes to the element
@@ -7,6 +9,8 @@
 🔜 Defers loading of the image until it is in/near the viewport (lazy loading)
 
 🖼️ Displays a blurry low-res placeholder until the image has loaded
+
+----
 
 This plugin supports:
 - Any 11ty template format that outputs to a .html file
