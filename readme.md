@@ -123,5 +123,7 @@ see the [LICENSE](LICENSE) file for details
 * Everyone who has contributed to the 
   [11ty](https://www.11ty.io/) project, without whom 
   this plugin wouldn't run
+* [José M. Pérez's blog post about progressive image loading](https://jmperezperez.com/medium-image-progressive-loading-placeholder/) 
+  which served as the inspiration for this plugin
 * [Addy Osmani's blog post about lazy loading](https://addyosmani.com/blog/lazy-loading/) 
   which served as the inspiration for the init script
