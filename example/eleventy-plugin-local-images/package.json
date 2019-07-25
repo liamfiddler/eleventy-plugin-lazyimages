@@ -1,0 +1,16 @@
+{
+  "name": "eleventy-plugin-lazyimages-example-local-images",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "eleventy --serve",
+    "build": "eleventy"
+  },
+  "author": "@liamfiddler",
+  "license": "MIT",
+  "devDependencies": {
+    "@11ty/eleventy": "^0.8.3",
+    "eleventy-plugin-local-images": "^0.3.0",
+    "eleventy-plugin-lazyimages": "github:liamfiddler/eleventy-plugin-lazyimages"
+  }
+}
