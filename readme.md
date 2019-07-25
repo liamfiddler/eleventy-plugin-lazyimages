@@ -53,12 +53,12 @@ img {
   height: auto;
 }
 ```
-The above CSS will ensure the image is never wider than its 
+The above CSS will ensure the image is never wider than its
 container and the aspect ratio is maintained.
 
 ### Configure the plugin (optional)
 
-You can pass an object with configuration options as the second 
+You can pass an object with configuration options as the second
 parameter:
 ```js
 eleventyConfig.addPlugin(lazyImagesPlugin, {
@@ -84,12 +84,12 @@ A full list of available configuration options are listed below.
 
 ## Example projects
 
-Example projects using the plugin can be found in the 
+Example projects using the plugin can be found in the
 [`/example`](./example) directory.
 
 - [Basic](./example/basic) - using default configuration
-- [Custom selector](./example/custom-selector) - using a custom image
-  selector to only target image in certain DIVs
+- [Custom selector](./example/custom-selector) - using a custom image selector to only target image in certain DIVs
+- [Usage with eleventy-plugin-local-images](./example/eleventy-plugin-local-images) - using this plugin with [eleventy-plugin-local-images](https://github.com/robb0wen/eleventy-plugin-local-images)
 
 ## Built with
 
@@ -107,23 +107,23 @@ This project welcomes suggestions and Pull Requests!
 
 * **Liam Fiddler** - *Initial work* - [@liamfiddler](https://github.com/liamfiddler)
 
-See also the list of 
-[contributors](https://github.com/liamfiddler/eleventy-plugin-lazyimages/contributors) 
+See also the list of
+[contributors](https://github.com/liamfiddler/eleventy-plugin-lazyimages/contributors)
 who participated in this project.
 
 ## License
 
-This project is licensed under the MIT License - 
+This project is licensed under the MIT License -
 see the [LICENSE](LICENSE) file for details
 
 ## Acknowledgments
 
-* The wonderfully supportive team at 
+* The wonderfully supportive team at
   [Mentally Friendly](https://mentallyfriendly.com)
-* Everyone who has contributed to the 
-  [11ty](https://www.11ty.io/) project, without whom 
+* Everyone who has contributed to the
+  [11ty](https://www.11ty.io/) project, without whom
   this plugin wouldn't run
-* [José M. Pérez's blog post about progressive image loading](https://jmperezperez.com/medium-image-progressive-loading-placeholder/) 
+* [José M. Pérez's blog post about progressive image loading](https://jmperezperez.com/medium-image-progressive-loading-placeholder/)
   which served as the inspiration for this plugin
-* [Addy Osmani's blog post about lazy loading](https://addyosmani.com/blog/lazy-loading/) 
+* [Addy Osmani's blog post about lazy loading](https://addyosmani.com/blog/lazy-loading/)
   which served as the inspiration for the init script
