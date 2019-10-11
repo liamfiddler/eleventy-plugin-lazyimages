@@ -61,7 +61,7 @@ const updateCache = (imageSrc, imageData) => {
   if (cacheFile) {
     const cacheData = JSON.stringify(lazyImagesCache);
 
-    fs.writeFile(cacheFile, cacheData, (err) => {  
+    fs.writeFile(cacheFile, cacheData, (err) => {
       if (err) {
         console.error('LazyImages: cacheFile', e);
       }
@@ -171,7 +171,7 @@ const transformMarkup = async (rawContent, outputPath) => {
           `<script>
             (${initLazyImages.toString()})(
               '${imgSelector}',
-              '${scriptSrc}',
+              '${scriptSrc}'
             );
           </script>`
         );
