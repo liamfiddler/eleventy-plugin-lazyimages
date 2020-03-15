@@ -9,8 +9,8 @@
   "author": "@liamfiddler",
   "license": "MIT",
   "devDependencies": {
-    "@11ty/eleventy": "^0.8.3",
+    "@11ty/eleventy": "^0.10.0",
     "eleventy-plugin-local-images": "^0.3.0",
-    "eleventy-plugin-lazyimages": "github:liamfiddler/eleventy-plugin-lazyimages"
+    "eleventy-plugin-lazyimages": "../../"
   }
 }
