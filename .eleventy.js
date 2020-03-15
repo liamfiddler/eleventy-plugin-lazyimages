@@ -20,6 +20,7 @@ const defaultLazyImagesConfig = {
   cacheFile: '.lazyimages.json',
   appendInitScript: true,
   scriptSrc: 'https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js',
+  preferNativeLazyLoad: true,
 };
 
 let lazyImagesConfig = defaultLazyImagesConfig;
@@ -132,8 +133,8 @@ const processImage = async imgElem => {
 
 // Have to use lowest common denominator JS language features here
 // because we don't know what the target browser support is
-const initLazyImages = function(selector, src) {
-  if ('loading' in HTMLImageElement.prototype) {
+const initLazyImages = function(selector, src, preferNativeLazyLoad) {
+  if (preferNativeLazyLoad && 'loading' in HTMLImageElement.prototype) {
     var images = document.querySelectorAll(selector);
     var numImages = images.length;
 
@@ -153,7 +154,7 @@ const initLazyImages = function(selector, src) {
 };
 
 const transformMarkup = async (rawContent, outputPath) => {
-  const { imgSelector, appendInitScript, scriptSrc } = lazyImagesConfig;
+  const { imgSelector, appendInitScript, scriptSrc, preferNativeLazyLoad } = lazyImagesConfig;
   let content = rawContent;
 
   if (outputPath.endsWith('.html')) {
@@ -171,7 +172,8 @@ const transformMarkup = async (rawContent, outputPath) => {
           `<script>
             (${initLazyImages.toString()})(
               '${imgSelector}',
-              '${scriptSrc}'
+              '${scriptSrc}',
+              ${!!preferNativeLazyLoad}
             );
           </script>`
         );
