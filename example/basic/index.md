@@ -4,8 +4,18 @@ title: Basic demo - eleventy-plugin-lazyimages
 ---
 # Basic demo
 
-This is a basic demo of 
+This is a basic demo of
 [eleventy-plugin-lazyimages](https://github.com/liamfiddler/eleventy-plugin-lazyimages)
+
+## These images are from the local filesystem:
+
+![Local Test](/img/test-01.png "Local Test")
+
+![Local Test](/img/test-02.jpg "Local Test")
+
+![Local Test](/img/test-03.jpg "Local Test")
+
+## These images are from a third-party website:
 
 ![Test](https://live.staticflickr.com/3915/14746807980_875aa68823_o.jpg "Test")
 
