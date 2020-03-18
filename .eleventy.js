@@ -16,7 +16,7 @@ const defaultLazyImagesConfig = {
   placeholderQuality: 60,
   imgSelector: 'img',
   transformImgPath,
-  className: 'lazyload',
+  className: ['lazyload'],
   cacheFile: '.lazyimages.json',
   appendInitScript: true,
   scriptSrc: 'https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js',
@@ -112,7 +112,7 @@ const processImage = async imgElem => {
 
   imgElem.setAttribute('loading', 'lazy');
   imgElem.setAttribute('data-src', imgElem.src);
-  imgElem.classList.add(className);
+  imgElem.classList.add(...className);
 
   if (imgElem.hasAttribute('srcset')) {
     const srcSet = imgElem.getAttribute('srcset');
