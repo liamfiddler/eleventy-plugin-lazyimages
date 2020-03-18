@@ -85,7 +85,7 @@ A full list of available configuration options are listed below.
 | `appendInitScript` | Boolean | Appends code to initialise lazy loading of images to the generated markup. Set this to `false` if you include your own lazy load script.<br>Default: `true` |
 | `scriptSrc` | String | The URI for the lazy load script that is injected into the markup via `appendInitScript`.<br>Default: `https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js` |
 | `preferNativeLazyLoad` | Boolean | Use the native browser `loading="lazy"` instead of the lazy load script (if available). Set this to `false` if you always want to use the lazy load script.<br>Default: `true` |
-| `className` | String | The class name added to found IMG elements. Do not change this value unless you intend to use your own `scriptSrc`.<br>Default: `lazyload` |
+| `className` | Array | The class names added to found IMG elements. Do not change this value unless you intend to use your own `scriptSrc`.<br>Default: `['lazyload']` |
 
 ## Example projects
 
