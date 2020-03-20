@@ -1,6 +1,17 @@
 const fs = require('fs');
+const url = require('url');
+const path = require('path');
 const { JSDOM } = require('jsdom');
 const Jimp = require('jimp');
+
+const supportedExtensions = [
+  'jpg',
+  'jpeg',
+  'gif',
+  'png',
+  'bmp',
+  'tiff',
+];
 
 const transformImgPath = (src) => {
   if (src.startsWith('/') && !src.startsWith('//')) {
@@ -109,6 +120,12 @@ const getImageData = async imageSrc => {
 const processImage = async imgElem => {
   const { transformImgPath, className } = lazyImagesConfig;
   const imgPath = transformImgPath(imgElem.src);
+  const fileExt = path.extname(url.parse(imgPath).pathname).substr(1);
+
+  if (!supportedExtensions.includes(fileExt.toLowerCase())) {
+    logMessage(`unsupported image extension: ${imgPath}`);
+    return;
+  }
 
   imgElem.setAttribute('loading', 'lazy');
   imgElem.setAttribute('data-src', imgElem.src);
