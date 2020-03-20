@@ -122,11 +122,6 @@ const processImage = async imgElem => {
   const imgPath = transformImgPath(imgElem.src);
   const fileExt = path.extname(url.parse(imgPath).pathname).substr(1);
 
-  if (!supportedExtensions.includes(fileExt.toLowerCase())) {
-    logMessage(`unsupported image extension: ${imgPath}`);
-    return;
-  }
-
   imgElem.setAttribute('loading', 'lazy');
   imgElem.setAttribute('data-src', imgElem.src);
 
@@ -137,6 +132,11 @@ const processImage = async imgElem => {
     const srcSet = imgElem.getAttribute('srcset');
     imgElem.setAttribute('data-srcset', srcSet);
     imgElem.removeAttribute('srcset');
+  }
+
+  if (!supportedExtensions.includes(fileExt.toLowerCase())) {
+    logMessage(`${fileExt} placeholder not supported: ${imgPath}`);
+    return;
   }
 
   try {
