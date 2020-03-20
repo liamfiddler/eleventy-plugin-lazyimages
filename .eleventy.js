@@ -112,7 +112,9 @@ const processImage = async imgElem => {
 
   imgElem.setAttribute('loading', 'lazy');
   imgElem.setAttribute('data-src', imgElem.src);
-  imgElem.classList.add(...className);
+
+  const classNameArr = Array.isArray(className) ? className : [className];
+  imgElem.classList.add(...classNameArr);
 
   if (imgElem.hasAttribute('srcset')) {
     const srcSet = imgElem.getAttribute('srcset');
