@@ -1,6 +1,17 @@
 const fs = require('fs');
+const url = require('url');
+const path = require('path');
 const { JSDOM } = require('jsdom');
 const Jimp = require('jimp');
+
+const supportedExtensions = [
+  'jpg',
+  'jpeg',
+  'gif',
+  'png',
+  'bmp',
+  'tiff',
+];
 
 const transformImgPath = (src) => {
   if (src.startsWith('/') && !src.startsWith('//')) {
@@ -109,6 +120,7 @@ const getImageData = async imageSrc => {
 const processImage = async imgElem => {
   const { transformImgPath, className } = lazyImagesConfig;
   const imgPath = transformImgPath(imgElem.src);
+  const fileExt = path.extname(url.parse(imgPath).pathname).substr(1);
 
   imgElem.setAttribute('loading', 'lazy');
   imgElem.setAttribute('data-src', imgElem.src);
@@ -120,6 +132,11 @@ const processImage = async imgElem => {
     const srcSet = imgElem.getAttribute('srcset');
     imgElem.setAttribute('data-srcset', srcSet);
     imgElem.removeAttribute('srcset');
+  }
+
+  if (!supportedExtensions.includes(fileExt.toLowerCase())) {
+    logMessage(`${fileExt} placeholder not supported: ${imgPath}`);
+    return;
   }
 
   try {
