@@ -176,7 +176,7 @@ const transformMarkup = async (rawContent, outputPath) => {
   const { imgSelector, appendInitScript, scriptSrc, preferNativeLazyLoad } = lazyImagesConfig;
   let content = rawContent;
 
-  if (outputPath.endsWith('.html')) {
+  if (outputPath && outputPath.endsWith('.html')) {
     const dom = new JSDOM(content);
     const images = [...dom.window.document.querySelectorAll(imgSelector)];
 
