@@ -104,7 +104,7 @@ const getImageData = async imageSrc => {
     .scaleToFit(maxPlaceholderWidth, maxPlaceholderHeight)
     .quality(placeholderQuality);
 
-  const encoded = await resized.getBase64Async(Jimp.MIME_JPEG);
+  const encoded = await resized.getBase64Async(Jimp.AUTO);
 
   imageData = {
     width,

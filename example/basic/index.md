@@ -15,6 +15,8 @@ This is a basic demo of
 
 ![Local Test](/img/test-03.jpg "Local Test")
 
+![Transparent Local Test](/img/transparent.png "Transparent Local Test")
+
 ## These images are from a third-party website:
 
 ![Test](https://live.staticflickr.com/3915/14746807980_875aa68823_o.jpg "Test")
