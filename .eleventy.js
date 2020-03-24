@@ -160,6 +160,10 @@ const initLazyImages = function(selector, src, preferNativeLazyLoad) {
     if (numImages > 0) {
       for (var i = 0; i < numImages; i++) {
         images[i].src = images[i].dataset.src;
+
+        if ('srcset' in images[i].dataset) {
+          images[i].srcset = images[i].dataset.srcset;
+        }
       }
     }
 
