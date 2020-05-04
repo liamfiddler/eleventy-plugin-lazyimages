@@ -1,17 +1,11 @@
 const fs = require('fs');
 const url = require('url');
+const querystring = require('querystring');
 const path = require('path');
 const { JSDOM } = require('jsdom');
 const Jimp = require('jimp');
 
-const supportedExtensions = [
-  'jpg',
-  'jpeg',
-  'gif',
-  'png',
-  'bmp',
-  'tiff',
-];
+const supportedExtensions = ['jpg', 'jpeg', 'gif', 'png', 'bmp', 'tiff'];
 
 const transformImgPath = (src) => {
   if (src.startsWith('/') && !src.startsWith('//')) {
@@ -53,7 +47,7 @@ const loadCache = () => {
       const cachedData = fs.readFileSync(cacheFile, 'utf8');
       lazyImagesCache = JSON.parse(cachedData);
     }
-  } catch(e) {
+  } catch (e) {
     console.error('LazyImages: cacheFile', e);
   }
 };
@@ -81,7 +75,7 @@ const updateCache = (imageSrc, imageData) => {
   }
 };
 
-const getImageData = async imageSrc => {
+const getImageData = async (imageSrc) => {
   const {
     maxPlaceholderWidth,
     maxPlaceholderHeight,
@@ -117,10 +111,18 @@ const getImageData = async imageSrc => {
   return imageData;
 };
 
-const processImage = async imgElem => {
+const processImage = async (imgElem) => {
   const { transformImgPath, className } = lazyImagesConfig;
+  if (/^data:/.test(imgElem.src)) {
+    logMessage(`skipping "data:" src`);
+    return;
+  }
   const imgPath = transformImgPath(imgElem.src);
-  const fileExt = path.extname(url.parse(imgPath).pathname).substr(1);
+  const parsedUrl = url.parse(imgPath);
+  let fileExt = path.extname(parsedUrl.pathname).substr(1);
+  if (!fileExt) {
+    fileExt = querystring.parse(parsedUrl.query).format; // try and get file format from querystring, for example "?format=jpg"
+  }
 
   imgElem.setAttribute('loading', 'lazy');
   imgElem.setAttribute('data-src', imgElem.src);
@@ -152,14 +154,16 @@ const processImage = async imgElem => {
 
 // Have to use lowest common denominator JS language features here
 // because we don't know what the target browser support is
-const initLazyImages = function(selector, src, preferNativeLazyLoad) {
+const initLazyImages = function (selector, src, preferNativeLazyLoad) {
   if (preferNativeLazyLoad && 'loading' in HTMLImageElement.prototype) {
     var images = document.querySelectorAll(selector);
     var numImages = images.length;
 
     if (numImages > 0) {
       for (var i = 0; i < numImages; i++) {
-        images[i].src = images[i].dataset.src;
+        if ('dataset' in images[i] && 'src' in images[i].dataset) {
+          images[i].src = images[i].dataset.src;
+        }
 
         if ('srcset' in images[i].dataset) {
           images[i].srcset = images[i].dataset.srcset;
@@ -177,7 +181,12 @@ const initLazyImages = function(selector, src, preferNativeLazyLoad) {
 };
 
 const transformMarkup = async (rawContent, outputPath) => {
-  const { imgSelector, appendInitScript, scriptSrc, preferNativeLazyLoad } = lazyImagesConfig;
+  const {
+    imgSelector,
+    appendInitScript,
+    scriptSrc,
+    preferNativeLazyLoad,
+  } = lazyImagesConfig;
   let content = rawContent;
 
   if (outputPath && outputPath.endsWith('.html')) {
