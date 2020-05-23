@@ -113,15 +113,19 @@ const getImageData = async (imageSrc) => {
 
 const processImage = async (imgElem) => {
   const { transformImgPath, className } = lazyImagesConfig;
+
   if (/^data:/.test(imgElem.src)) {
     logMessage(`skipping "data:" src`);
     return;
   }
+
   const imgPath = transformImgPath(imgElem.src);
   const parsedUrl = url.parse(imgPath);
   let fileExt = path.extname(parsedUrl.pathname).substr(1);
+
   if (!fileExt) {
-    fileExt = querystring.parse(parsedUrl.query).format; // try and get file format from querystring, for example "?format=jpg"
+    // Twitter and similar pass the file format in the querystring, e.g. "?format=jpg"
+    fileExt = querystring.parse(parsedUrl.query).format;
   }
 
   imgElem.setAttribute('loading', 'lazy');
