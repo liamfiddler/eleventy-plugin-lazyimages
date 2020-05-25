@@ -213,6 +213,8 @@ const transformMarkup = async (rawContent, outputPath) => {
             );
           </script>`
         );
+      } else if (scriptSrc !== defaultLazyImagesConfig.scriptSrc) {
+        console.warn('LazyImages - scriptSrc config is ignored because appendInitScript=false');
       }
 
       content = dom.serialize();
