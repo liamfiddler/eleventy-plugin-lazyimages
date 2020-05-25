@@ -20,6 +20,10 @@ This plugin supports:
 - Responsive images using `srcset`; the image in the `src` attribute will be
   used for determining the placeholder image and width/height attributes
 
+----
+**Like this project? [Buy me a coffee!](https://ko-fi.com/liamfiddler)**
+----
+
 ## Getting started
 
 ### Install the plugin
@@ -197,3 +201,7 @@ We've included an
 [example project in this repo](./example/eleventy-plugin-local-images)
 demonstrating this plugin with
 [eleventy-plugin-local-images](https://github.com/robb0wen/eleventy-plugin-local-images).
+
+----
+**Like this project? [Buy me a coffee!](https://ko-fi.com/liamfiddler)**
+----
