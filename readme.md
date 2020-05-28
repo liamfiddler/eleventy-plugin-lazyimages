@@ -16,7 +16,7 @@ This plugin supports:
 - Custom image selectors; target all images or only images in a certain part
   of the page
 - Placeholder generation for all image formats supported by
-  [JIMP](https://github.com/oliver-moran/jimp); BMP, GIF, JPEG, PNG, & TIFF
+  [Sharp](https://sharp.pixelplumbing.com/); JPEG, PNG, WebP, TIFF, GIF, & SVG
 - Responsive images using `srcset`; the image in the `src` attribute will be
   used for determining the placeholder image and width/height attributes
 
@@ -83,14 +83,13 @@ and some common questions are covered at the end of this file.
 |--|--|--|
 | `maxPlaceholderWidth` | Integer | The maximum width in pixels of the generated placeholder image. Recommended values are between 6 and 15.<br>Default: `12` |
 | `maxPlaceholderHeight` | Integer | The maximum height in pixels of the generated placeholder image. Recommended values are between 6 and 15.<br>Default: `12` |
-| `placeholderQuality` | Integer | The JPEG compression quality of the generated placeholder image.<br>Default: `60` |
 | `imgSelector` | String | The DOM selector used to find IMG elements in the markup.<br>Default: `img` |
 | `transformImgPath` | Function | A function that takes the IMG `src` attribute and returns a string representing the actual path to your image. |
 | `cacheFile` | String | Cache image metadata and placeholder images to this filename. Greatly speeds up subsequent builds. Pass an empty string to turn off the cache.<br>Default: `.lazyimages.json` |
 | `appendInitScript` | Boolean | Appends code to initialise lazy loading of images to the generated markup. Set this to `false` if you include your own lazy load script.<br>Default: `true` |
 | `scriptSrc` | String | The URI for the lazy load script that is injected into the markup via `appendInitScript`.<br>Default: `https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js` |
 | `preferNativeLazyLoad` | Boolean | Use the native browser `loading="lazy"` instead of the lazy load script (if available). Set this to `false` if you always want to use the lazy load script.<br>Default: `true` |
-| `className` | Array | The class names added to found IMG elements. Do not change this value unless you intend to use your own `scriptSrc`.<br>Default: `['lazyload']` |
+| `className` | Array<String> | The class names added to found IMG elements. You usually don't need to change this unless you're using a different `scriptSrc`.<br>Default: `['lazyload']` |
 
 ## Example projects
 
@@ -106,7 +105,7 @@ Example projects using the plugin can be found in the
 
 * [JSDOM](https://github.com/jsdom/jsdom) - To find and modify image
   elements in 11ty's generated markup
-* [JIMP](https://github.com/oliver-moran/jimp) - To read image
+* [Sharp](https://sharp.pixelplumbing.com/) - To read image
   metadata and generate low-res placeholders
 * [LazySizes](https://github.com/aFarkas/lazysizes) - Handles lazy loading
 
@@ -149,28 +148,22 @@ but you can specify a relative path via the `scriptSrc` configuration option.
 
 ### Does my local image path have to match the output path?
 
-**(a.k.a Why do I have "Error: ENOENT" messages in my terminal?)**
+**(a.k.a Why do I have "[Error: Input file is missing]" messages in my terminal?)**
 
-**(a.k.a Can I nest all my input files under `/src`?)**
+By default this plugin assumes the file referenced in a `src` attribute like
+`<img src="/images/dog.jpg" />` exists at `<project root>/images/dog.jpg` or
+`<project root>/src/images/dog.jpg`.
 
-By default this plugin assumes your file paths match the output paths,
-i.e. `<img src="/images/dog.jpg" />` exists at `<project root>/images/dog.jpg`.
-
-However the `transformImgPath` config option allows you to specify a function
-that points the plugin to the internal image path.
+If you prefer to store your images elsewhere the `transformImgPath` config
+option allows you to specify a function that points the plugin to your
+internal image path.
 
 For example, if your file structure stores `<img src="/images/dog.jpg" />`
-at `<project root>/src/images/dog.jpg` you could set `transformImgPath` like:
+at `<project root>/assets/dog.jpg` you could set `transformImgPath` like:
 ```js
 // .eleventy.js
 eleventyConfig.addPlugin(lazyImagesPlugin, {
-  transformImgPath: (imgPath) => {
-    if (imgPath.startsWith('/') && !imgPath.startsWith('//')) {
-      return `./src${imgPath}`;
-    }
-
-    return imgPath;
-  },
+  transformImgPath: (imgPath) => imgPath.replace('/images/', './assets/'),
 });
 ```
 
@@ -188,9 +181,9 @@ Note: if you need to modify the custom script's parameters the recommended appro
 is to set `appendInitScript: false` in this plugin's config. This tells the plugin
 to skip adding the script loader code to the page. It ignores any value set for
 scriptSrc and allows you to use your own method for including the custom script.
-The plugin will still set the data-src + width + height attributes on IMG tags and
-generate the low quality image placeholders, it just doesn't manage the actual
-lazy loading.
+The plugin will still set the `data-src` + `width` + `height` attributes on IMG
+tags and generate the low quality image placeholders, it just doesn't manage the
+actual lazy loading.
 
 ### Can I use this plugin with a plugin that moves/renames image files?
 

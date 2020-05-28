@@ -1,24 +1,24 @@
-const fs = require('fs');
 const url = require('url');
 const querystring = require('querystring');
 const path = require('path');
 const { JSDOM } = require('jsdom');
-const Jimp = require('jimp');
+const sharp = require('sharp');
+const fetch = require('node-fetch');
+const cache = require('./cache');
+const {
+  transformImgPath,
+  logMessage,
+  initScript,
+  checkConfig,
+} = require('./helpers');
 
-const supportedExtensions = ['jpg', 'jpeg', 'gif', 'png', 'bmp', 'tiff'];
+// List of file extensions this plugin can handle (basically just what sharp supports)
+const supportedExtensions = ['jpg', 'jpeg', 'gif', 'png', 'webp', 'svg', 'tiff'];
 
-const transformImgPath = (src) => {
-  if (src.startsWith('/') && !src.startsWith('//')) {
-    return `.${src}`;
-  }
-
-  return src;
-};
-
+// The default values for the plugin
 const defaultLazyImagesConfig = {
   maxPlaceholderWidth: 12,
   maxPlaceholderHeight: 12,
-  placeholderQuality: 60,
   imgSelector: 'img',
   transformImgPath,
   className: ['lazyload'],
@@ -28,61 +28,46 @@ const defaultLazyImagesConfig = {
   preferNativeLazyLoad: true,
 };
 
+// A global to store the current config (saves us passing it around functions)
 let lazyImagesConfig = defaultLazyImagesConfig;
-let lazyImagesCache = {};
 
-const logMessage = (message) => {
-  console.log(`LazyImages - ${message}`);
-};
+// Reads the image object from the source file
+const readImage = async (imageSrc) => {
+  let image;
 
-const loadCache = () => {
-  const { cacheFile } = lazyImagesConfig;
-
-  if (!cacheFile) {
-    return;
+  if (imageSrc.startsWith('http') || imageSrc.startsWith('//')) {
+    const res = await fetch(imageSrc);
+    const buffer = await res.buffer();
+    image = await sharp(buffer);
+    return image;
   }
 
   try {
-    if (fs.existsSync(cacheFile)) {
-      const cachedData = fs.readFileSync(cacheFile, 'utf8');
-      lazyImagesCache = JSON.parse(cachedData);
+    image = await sharp(imageSrc);
+    await image.metadata(); // just to confirm it can be read
+  } catch (firstError) {
+    try {
+      // We couldn't read the file at the input path, but maybe it's
+      // in './src', developers love to put things in './src'
+      image = await sharp(`./src/${imageSrc}`);
+      await image.metadata();
+    } catch (secondError) {
+      throw firstError;
     }
-  } catch (e) {
-    console.error('LazyImages: cacheFile', e);
-  }
-};
-
-const readCache = (imageSrc) => {
-  if (imageSrc in lazyImagesCache) {
-    return lazyImagesCache[imageSrc];
   }
 
-  return undefined;
+  return image;
 };
 
-const updateCache = (imageSrc, imageData) => {
-  const { cacheFile } = lazyImagesConfig;
-  lazyImagesCache[imageSrc] = imageData;
-
-  if (cacheFile) {
-    const cacheData = JSON.stringify(lazyImagesCache);
-
-    fs.writeFile(cacheFile, cacheData, (err) => {
-      if (err) {
-        console.error('LazyImages: cacheFile', e);
-      }
-    });
-  }
-};
-
+// Gets the image width+height+LQIP from the cache, or generates them if not found
 const getImageData = async (imageSrc) => {
   const {
     maxPlaceholderWidth,
     maxPlaceholderHeight,
-    placeholderQuality,
+    cacheFile,
   } = lazyImagesConfig;
 
-  let imageData = readCache(imageSrc);
+  let imageData = cache.read(imageSrc);
 
   if (imageData) {
     return imageData;
@@ -90,32 +75,38 @@ const getImageData = async (imageSrc) => {
 
   logMessage(`started processing ${imageSrc}`);
 
-  const image = await Jimp.read(imageSrc);
-  const width = image.bitmap.width;
-  const height = image.bitmap.height;
+  const image = await readImage(imageSrc);
+  const metadata = await image.metadata();
+  const width = metadata.width;
+  const height = metadata.height;
 
-  const resized = image
-    .scaleToFit(maxPlaceholderWidth, maxPlaceholderHeight)
-    .quality(placeholderQuality);
+  const resized = await image
+    .resize({
+      width: maxPlaceholderWidth,
+      height: maxPlaceholderHeight,
+      fit: sharp.fit.inside,
+    })
+    .toBuffer();
 
-  const encoded = await resized.getBase64Async(Jimp.AUTO);
+  const encoded = resized.toString('base64');
 
   imageData = {
     width,
     height,
-    src: encoded,
+    src: `data:image/png;base64,${encoded}`,
   };
 
   logMessage(`finished processing ${imageSrc}`);
-  updateCache(imageSrc, imageData);
+  cache.update(cacheFile, imageSrc, imageData);
   return imageData;
 };
 
+// Adds the attributes to the image element
 const processImage = async (imgElem) => {
   const { transformImgPath, className } = lazyImagesConfig;
 
-  if (/^data:/.test(imgElem.src)) {
-    logMessage(`skipping "data:" src`);
+  if (imgElem.src.startsWith('data:')) {
+    logMessage('skipping image with data URI');
     return;
   }
 
@@ -147,7 +138,6 @@ const processImage = async (imgElem) => {
 
   try {
     const image = await getImageData(imgPath);
-
     imgElem.setAttribute('width', image.width);
     imgElem.setAttribute('height', image.height);
     imgElem.setAttribute('src', image.src);
@@ -156,34 +146,7 @@ const processImage = async (imgElem) => {
   }
 };
 
-// Have to use lowest common denominator JS language features here
-// because we don't know what the target browser support is
-const initLazyImages = function (selector, src, preferNativeLazyLoad) {
-  if (preferNativeLazyLoad && 'loading' in HTMLImageElement.prototype) {
-    var images = document.querySelectorAll(selector);
-    var numImages = images.length;
-
-    if (numImages > 0) {
-      for (var i = 0; i < numImages; i++) {
-        if ('dataset' in images[i] && 'src' in images[i].dataset) {
-          images[i].src = images[i].dataset.src;
-        }
-
-        if ('srcset' in images[i].dataset) {
-          images[i].srcset = images[i].dataset.srcset;
-        }
-      }
-    }
-
-    return;
-  }
-
-  var script = document.createElement('script');
-  script.async = true;
-  script.src = src;
-  document.body.appendChild(script);
-};
-
+// Scans the output HTML for images, processes them, & appends the init script
 const transformMarkup = async (rawContent, outputPath) => {
   const {
     imgSelector,
@@ -206,15 +169,13 @@ const transformMarkup = async (rawContent, outputPath) => {
         dom.window.document.body.insertAdjacentHTML(
           'beforeend',
           `<script>
-            (${initLazyImages.toString()})(
+            (${initScript.toString()})(
               '${imgSelector}',
               '${scriptSrc}',
               ${!!preferNativeLazyLoad}
             );
           </script>`
         );
-      } else if (scriptSrc !== defaultLazyImagesConfig.scriptSrc) {
-        console.warn('LazyImages - scriptSrc config is ignored because appendInitScript=false');
       }
 
       content = dom.serialize();
@@ -224,6 +185,7 @@ const transformMarkup = async (rawContent, outputPath) => {
   return content;
 };
 
+// Export as 11ty plugin
 module.exports = {
   initArguments: {},
   configFunction: (eleventyConfig, pluginOptions = {}) => {
@@ -233,7 +195,8 @@ module.exports = {
       pluginOptions
     );
 
-    loadCache();
+    checkConfig(lazyImagesConfig, defaultLazyImagesConfig);
+    cache.load(lazyImagesConfig.cacheFile);
     eleventyConfig.addTransform('lazyimages', transformMarkup);
   },
 };

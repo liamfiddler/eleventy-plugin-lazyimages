@@ -9,7 +9,7 @@
   "author": "@liamfiddler",
   "license": "MIT",
   "devDependencies": {
-    "@11ty/eleventy": "^0.10.0",
+    "@11ty/eleventy": "^0.11.0",
     "eleventy-plugin-lazyimages": "../../"
   }
 }
