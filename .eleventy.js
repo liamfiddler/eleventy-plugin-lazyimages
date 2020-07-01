@@ -15,10 +15,16 @@ const transformImgPath = (src) => {
   return src;
 };
 
+const transformPlaceholderImgPath = (src) => {
+  transformImgPath(src);
+};
+
 const defaultLazyImagesConfig = {
   maxPlaceholderWidth: 12,
   maxPlaceholderHeight: 12,
   placeholderQuality: 60,
+  placeholderSaveAsImg: false,
+  transformPlaceholderImgPath,
   imgSelector: 'img',
   transformImgPath,
   className: ['lazyload'],
@@ -80,31 +86,48 @@ const getImageData = async (imageSrc) => {
     maxPlaceholderWidth,
     maxPlaceholderHeight,
     placeholderQuality,
+    placeholderSaveAsImg,
+    transformImgPath,
+    transformPlaceholderImgPath,
   } = lazyImagesConfig;
 
-  let imageData = readCache(imageSrc);
+  let imageData = readCache(transformImgPath(imageSrc));
 
   if (imageData) {
     return imageData;
   }
 
-  logMessage(`started processing ${imageSrc}`);
+  logMessage(`started processing ${transformImgPath(imageSrc)}`);
 
-  const image = await Jimp.read(imageSrc);
+  const image = await Jimp.read(transformImgPath(imageSrc));
   const width = image.bitmap.width;
   const height = image.bitmap.height;
+
+  imageData = {
+    width,
+    height,
+  };
 
   const resized = image
     .scaleToFit(maxPlaceholderWidth, maxPlaceholderHeight)
     .quality(placeholderQuality);
 
-  const encoded = await resized.getBase64Async(Jimp.AUTO);
+  // base64 encoded image, or path to binary file
+  let placeholderImg;
 
-  imageData = {
-    width,
-    height,
-    src: encoded,
-  };
+  if (placeholderSaveAsImg) {
+    let fileNameWithExt = path.basename(imageSrc);
+    let imageDir = imageSrc.replace(fileNameWithExt, '');
+    let serveFrom = path.join(imageDir, 'placeholders', fileNameWithExt);
+    let saveTo = transformPlaceholderImgPath(serveFrom);
+
+    logMessage(`writing img to ${saveTo}`);
+    placeholderImg = await resized.writeAsync(saveTo);
+    imageData.src = serveFrom;
+  } else {
+    placeholderImg = await resized.getBase64Async(Jimp.AUTO);
+    imageData.src = placeholderImg;
+  }
 
   logMessage(`finished processing ${imageSrc}`);
   updateCache(imageSrc, imageData);
@@ -112,7 +135,7 @@ const getImageData = async (imageSrc) => {
 };
 
 const processImage = async (imgElem) => {
-  const { transformImgPath, className } = lazyImagesConfig;
+  const { transformImgPath, placeholderSaveAsImg, className } = lazyImagesConfig;
 
   if (/^data:/.test(imgElem.src)) {
     logMessage(`skipping "data:" src`);
@@ -146,7 +169,7 @@ const processImage = async (imgElem) => {
   }
 
   try {
-    const image = await getImageData(imgPath);
+    const image = await getImageData(imgElem.src);
 
     imgElem.setAttribute('width', image.width);
     imgElem.setAttribute('height', image.height);
