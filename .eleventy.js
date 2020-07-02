@@ -107,13 +107,6 @@ const processImage = async (imgElem) => {
   }
 
   if (!imgElem.getAttribute('loading')) imgElem.setAttribute('loading', 'lazy');
-  imgElem.setAttribute('data-src', imgElem.src);
-
-  if (imgElem.hasAttribute('srcset')) {
-    const srcSet = imgElem.getAttribute('srcset');
-    imgElem.setAttribute('data-srcset', srcSet);
-    imgElem.removeAttribute('srcset');
-  }
 
   if (!supportedExtensions.includes(fileExt.toLowerCase())) {
     logMessage(`${fileExt} placeholder not supported: ${imgPath}`);
@@ -128,7 +121,6 @@ const processImage = async (imgElem) => {
 
     imgElem.setAttribute('width', image.width);
     imgElem.setAttribute('height', image.height);
-    imgElem.setAttribute('src', image.src);
   } catch (e) {
     console.error('LazyImages', imgPath, e);
   }
