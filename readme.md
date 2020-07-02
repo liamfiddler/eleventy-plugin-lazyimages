@@ -6,23 +6,19 @@ What this plugin does:
 - 🔍 Finds IMG elements in your markup
 - 💉 Injects the source image width and height attributes to the element
 - 🔜 Defers loading of the image until it is in/near the viewport
-  (lazy loading)
-- 🖼️ Displays a blurry low-res placeholder until the image has loaded
-  (<abbr title="Low Quality Image Placeholder">LQIP</abbr>)
+  (native lazy loading only, no polyfill)
 
 This plugin supports:
 - Any 11ty template format that outputs to a .html file
 - Absolute and relative image paths
 - Custom image selectors; target all images or only images in a certain part
   of the page
-- Placeholder generation for all image formats supported by
-  [JIMP](https://github.com/oliver-moran/jimp); BMP, GIF, JPEG, PNG, & TIFF
 - Responsive images using `srcset`; the image in the `src` attribute will be
   used for determining the placeholder image and width/height attributes
 
 ----
 
-**Like this project? [Buy me a coffee!](https://ko-fi.com/liamfiddler)**
+**Like this project? [Buy the original author a coffee!](https://ko-fi.com/liamfiddler)**
 
 ----
 
@@ -33,10 +29,10 @@ This plugin supports:
 In your project directory run:
 ```sh
 # Using npm
-npm install eleventy-plugin-lazyimages --save-dev
+npm install github:hirusi/eleventy-plugin-lazyimages --save-dev
 
 # Or using yarn
-yarn add eleventy-plugin-lazyimages --dev
+yarn add github:hirusi/eleventy-plugin-lazyimages --dev
 ```
 
 Then update your project's `.eleventy.js` to include the plugin:
@@ -81,26 +77,9 @@ and some common questions are covered at the end of this file.
 
 | Key | Type | Description |
 |--|--|--|
-| `maxPlaceholderWidth` | Integer | The maximum width in pixels of the generated placeholder image. Recommended values are between 6 and 15.<br>Default: `12` |
-| `maxPlaceholderHeight` | Integer | The maximum height in pixels of the generated placeholder image. Recommended values are between 6 and 15.<br>Default: `12` |
-| `placeholderQuality` | Integer | The JPEG compression quality of the generated placeholder image.<br>Default: `60` |
 | `imgSelector` | String | The DOM selector used to find IMG elements in the markup.<br>Default: `img` |
 | `transformImgPath` | Function | A function that takes the IMG `src` attribute and returns a string representing the actual path to your image. |
 | `cacheFile` | String | Cache image metadata and placeholder images to this filename. Greatly speeds up subsequent builds. Pass an empty string to turn off the cache.<br>Default: `.lazyimages.json` |
-| `appendInitScript` | Boolean | Appends code to initialise lazy loading of images to the generated markup. Set this to `false` if you include your own lazy load script.<br>Default: `true` |
-| `scriptSrc` | String | The URI for the lazy load script that is injected into the markup via `appendInitScript`.<br>Default: `https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js` |
-| `preferNativeLazyLoad` | Boolean | Use the native browser `loading="lazy"` instead of the lazy load script (if available). Set this to `false` if you always want to use the lazy load script.<br>Default: `true` |
-| `className` | Array | The class names added to found IMG elements. Do not change this value unless you intend to use your own `scriptSrc`.<br>Default: `['lazyload']` |
-
-## Example projects
-
-Example projects using the plugin can be found in the
-[`/example`](./example) directory.
-
-- [Basic](./example/basic) - using default configuration
-- [Custom selector](./example/custom-selector) - using a custom image selector to only target image in certain DIVs
-- [Usage with eleventy-plugin-local-images](./example/eleventy-plugin-local-images) - using this plugin with [eleventy-plugin-local-images](https://github.com/robb0wen/eleventy-plugin-local-images)
-- [Usage with vanilla-lazyload](./example/verlok-vanilla-lazyload) - using this plugin with [vanilla-lazyload](https://www.npmjs.com/package/vanilla-lazyload)
 
 ## Built with
 
@@ -117,9 +96,10 @@ This project welcomes suggestions and Pull Requests!
 ## Authors
 
 * **Liam Fiddler** - *Initial work* - [@liamfiddler](https://github.com/liamfiddler)
+* **[Ru Singh](https://rusingh.com)** - *stripped down to native lazy loading and removes LQIP*
 
 See also the list of
-[contributors](https://github.com/liamfiddler/eleventy-plugin-lazyimages/contributors)
+[contributors](https://github.com/hirusi/eleventy-plugin-lazyimages/contributors)
 who participated in this project.
 
 ## License
@@ -140,12 +120,6 @@ see the [LICENSE](LICENSE) file for details
   which served as the inspiration for the init script
 
 ## Common questions
-
-### Can I host the lazy load script locally?
-
-Yes! This plugin defaults to
-[LazySizes from JSDelivr](https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js)
-but you can specify a relative path via the `scriptSrc` configuration option.
 
 ### Does my local image path have to match the output path?
 
@@ -174,24 +148,6 @@ eleventyConfig.addPlugin(lazyImagesPlugin, {
 });
 ```
 
-### Can I use a different lazy load script?
-
-Yes! By default this plugin uses [LazySizes](https://github.com/aFarkas/lazysizes)
-to handle lazy loading, but any lazy load script that reads from the `data-src`
-attribute is supported via the `scriptSrc` configuration option.
-
-We've included an [example project in this repo](./example/verlok-vanilla-lazyload)
-demonstrating this plugin using
-[vanilla-lazyload](https://www.npmjs.com/package/vanilla-lazyload).
-
-Note: if you need to modify the custom script's parameters the recommended approach
-is to set `appendInitScript: false` in this plugin's config. This tells the plugin
-to skip adding the script loader code to the page. It ignores any value set for
-scriptSrc and allows you to use your own method for including the custom script.
-The plugin will still set the data-src + width + height attributes on IMG tags and
-generate the low quality image placeholders, it just doesn't manage the actual
-lazy loading.
-
 ### Can I use this plugin with a plugin that moves/renames image files?
 
 Yes! The key to solving this problem is the order in which the plugins are
@@ -206,6 +162,6 @@ demonstrating this plugin with
 
 ----
 
-**Like this project? [Buy me a coffee!](https://ko-fi.com/liamfiddler)**
+**Like this project? [Buy the original author a coffee!](https://ko-fi.com/liamfiddler)**
 
 ----
