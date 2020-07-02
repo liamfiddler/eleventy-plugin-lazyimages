@@ -15,23 +15,10 @@ const transformImgPath = (src) => {
   return src;
 };
 
-const transformPlaceholderImgPath = (src) => {
-  transformImgPath(src);
-};
-
 const defaultLazyImagesConfig = {
-  maxPlaceholderWidth: 12,
-  maxPlaceholderHeight: 12,
-  placeholderQuality: 60,
-  placeholderSaveAsImg: false,
-  transformPlaceholderImgPath,
   imgSelector: 'img',
   transformImgPath,
-  className: ['lazyload'],
   cacheFile: '.lazyimages.json',
-  appendInitScript: true,
-  scriptSrc: 'https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js',
-  preferNativeLazyLoad: true,
 };
 
 let lazyImagesConfig = defaultLazyImagesConfig;
@@ -82,24 +69,15 @@ const updateCache = (imageSrc, imageData) => {
 };
 
 const getImageData = async (imageSrc) => {
-  const {
-    maxPlaceholderWidth,
-    maxPlaceholderHeight,
-    placeholderQuality,
-    placeholderSaveAsImg,
-    transformImgPath,
-    transformPlaceholderImgPath,
-  } = lazyImagesConfig;
-
-  let imageData = readCache(transformImgPath(imageSrc));
+  let imageData = readCache(imageSrc);
 
   if (imageData) {
     return imageData;
   }
 
-  logMessage(`started processing ${transformImgPath(imageSrc)}`);
+  logMessage(`started processing ${imageSrc}`);
 
-  const image = await Jimp.read(transformImgPath(imageSrc));
+  const image = await Jimp.read(imageSrc);
   const width = image.bitmap.width;
   const height = image.bitmap.height;
 
@@ -108,34 +86,13 @@ const getImageData = async (imageSrc) => {
     height,
   };
 
-  const resized = image
-    .scaleToFit(maxPlaceholderWidth, maxPlaceholderHeight)
-    .quality(placeholderQuality);
-
-  // base64 encoded image, or path to binary file
-  let placeholderImg;
-
-  if (placeholderSaveAsImg) {
-    let fileNameWithExt = path.basename(imageSrc);
-    let imageDir = imageSrc.replace(fileNameWithExt, '');
-    let serveFrom = path.join(imageDir, 'placeholders', fileNameWithExt);
-    let saveTo = transformPlaceholderImgPath(serveFrom);
-
-    logMessage(`writing img to ${saveTo}`);
-    placeholderImg = await resized.writeAsync(saveTo);
-    imageData.src = serveFrom;
-  } else {
-    placeholderImg = await resized.getBase64Async(Jimp.AUTO);
-    imageData.src = placeholderImg;
-  }
-
   logMessage(`finished processing ${imageSrc}`);
   updateCache(imageSrc, imageData);
   return imageData;
 };
 
 const processImage = async (imgElem) => {
-  const { transformImgPath, placeholderSaveAsImg, className } = lazyImagesConfig;
+  const { transformImgPath } = lazyImagesConfig;
 
   if (/^data:/.test(imgElem.src)) {
     logMessage(`skipping "data:" src`);
@@ -151,11 +108,8 @@ const processImage = async (imgElem) => {
     fileExt = querystring.parse(parsedUrl.query).format;
   }
 
-  imgElem.setAttribute('loading', 'lazy');
+  if (!imgElem.getAttribute('loading')) imgElem.setAttribute('loading', 'lazy');
   imgElem.setAttribute('data-src', imgElem.src);
-
-  const classNameArr = Array.isArray(className) ? className : [className];
-  imgElem.classList.add(...classNameArr);
 
   if (imgElem.hasAttribute('srcset')) {
     const srcSet = imgElem.getAttribute('srcset');
@@ -169,7 +123,7 @@ const processImage = async (imgElem) => {
   }
 
   try {
-    const image = await getImageData(imgElem.src);
+    const image = await getImageData(imgPath);
 
     imgElem.setAttribute('width', image.width);
     imgElem.setAttribute('height', image.height);
@@ -179,41 +133,8 @@ const processImage = async (imgElem) => {
   }
 };
 
-// Have to use lowest common denominator JS language features here
-// because we don't know what the target browser support is
-const initLazyImages = function (selector, src, preferNativeLazyLoad) {
-  if (preferNativeLazyLoad && 'loading' in HTMLImageElement.prototype) {
-    var images = document.querySelectorAll(selector);
-    var numImages = images.length;
-
-    if (numImages > 0) {
-      for (var i = 0; i < numImages; i++) {
-        if ('dataset' in images[i] && 'src' in images[i].dataset) {
-          images[i].src = images[i].dataset.src;
-        }
-
-        if ('srcset' in images[i].dataset) {
-          images[i].srcset = images[i].dataset.srcset;
-        }
-      }
-    }
-
-    return;
-  }
-
-  var script = document.createElement('script');
-  script.async = true;
-  script.src = src;
-  document.body.appendChild(script);
-};
-
 const transformMarkup = async (rawContent, outputPath) => {
-  const {
-    imgSelector,
-    appendInitScript,
-    scriptSrc,
-    preferNativeLazyLoad,
-  } = lazyImagesConfig;
+  const { imgSelector } = lazyImagesConfig;
   let content = rawContent;
 
   if (outputPath && outputPath.endsWith('.html')) {
@@ -224,21 +145,6 @@ const transformMarkup = async (rawContent, outputPath) => {
       logMessage(`found ${images.length} images in ${outputPath}`);
       await Promise.all(images.map(processImage));
       logMessage(`processed ${images.length} images in ${outputPath}`);
-
-      if (appendInitScript) {
-        dom.window.document.body.insertAdjacentHTML(
-          'beforeend',
-          `<script>
-            (${initLazyImages.toString()})(
-              '${imgSelector}',
-              '${scriptSrc}',
-              ${!!preferNativeLazyLoad}
-            );
-          </script>`
-        );
-      } else if (scriptSrc !== defaultLazyImagesConfig.scriptSrc) {
-        console.warn('LazyImages - scriptSrc config is ignored because appendInitScript=false');
-      }
 
       content = dom.serialize();
     }
