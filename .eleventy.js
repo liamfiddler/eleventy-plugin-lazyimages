@@ -78,12 +78,10 @@ const getImageData = async (imageSrc) => {
   logMessage(`started processing ${imageSrc}`);
 
   const image = await Jimp.read(imageSrc);
-  const width = image.bitmap.width;
-  const height = image.bitmap.height;
 
   imageData = {
-    width,
-    height,
+    width: image.bitmap.width,
+    height: image.bitmap.height,
   };
 
   logMessage(`finished processing ${imageSrc}`);
@@ -121,6 +119,9 @@ const processImage = async (imgElem) => {
     logMessage(`${fileExt} placeholder not supported: ${imgPath}`);
     return;
   }
+
+  // External links only lazily loaded. Can't process other attributes like width and height. Use external images sparingly on your site as it might cause jankiness.
+  if (imgPath.match(/^http[s]?:\/\//i)) return;
 
   try {
     const image = await getImageData(imgPath);
