@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/liamfiddler/eleventy-plugin-lazyimages#readme",
   "dependencies": {
-    "jimp": "^0.9.5",
+    "jimp": "^0.14.0",
     "jsdom": "^16.2.1"
   }
 }
