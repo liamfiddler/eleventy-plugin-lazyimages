@@ -147,9 +147,22 @@ const processImage = async (imgElem) => {
 
   try {
     const image = await getImageData(imgPath);
+    const imageWidth = imgElem.getAttribute('width')
 
-    imgElem.setAttribute('width', image.width);
-    imgElem.setAttribute('height', image.height);
+    if (!imageWidth) {
+      imgElem.setAttribute('width', image.width);
+    }
+
+    if (!imgElem.hasAttribute('height')) {
+      // If 'width' attribute was set on the image, we should set appropriate height,
+      // to keep correct aspect ratio
+      if (imageWidth) {
+        imgElem.setAttribute('height', image.height * imageWidth / image.width);
+      } else {
+        imgElem.setAttribute('height', image.height);
+      }
+    }
+
     imgElem.setAttribute('src', image.src);
   } catch (e) {
     console.error('LazyImages', imgPath, e);
