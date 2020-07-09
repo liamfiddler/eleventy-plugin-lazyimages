@@ -11,7 +11,9 @@ This is a basic demo of
 
 ![Local Test](/img/test-01.png "Local Test")
 
-![Local Test](/img/test-02.jpg "Local Test")
+<img src="/img/test-02.jpg" width="100" alt="Local Test with width attr" class="unstyled">
+
+<img src="/img/test-02.jpg" height="50" alt="Local Test with height attr" class="unstyled">
 
 ![Local Test](/img/test-03.jpg "Local Test")
 

@@ -35,12 +35,6 @@ exports.initScript = function (selector, src, preferNativeLazyLoad) {
       return;
     }
 
-    for (var i = 0; i < numImages; i++) {
-      if (images[i].hasAttribute('loading')) {
-        images[i].removeAttribute('loading');
-      }
-    }
-
     var script = document.createElement('script');
     script.async = true;
     script.src = src;

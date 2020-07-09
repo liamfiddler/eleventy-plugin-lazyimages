@@ -13,19 +13,27 @@ const {
 } = require('./helpers');
 
 // List of file extensions this plugin can handle (basically just what sharp supports)
-const supportedExtensions = ['jpg', 'jpeg', 'gif', 'png', 'webp', 'svg', 'tiff'];
+const supportedExtensions = [
+  'jpg',
+  'jpeg',
+  'gif',
+  'png',
+  'webp',
+  'svg',
+  'tiff',
+];
 
 // The default values for the plugin
 const defaultLazyImagesConfig = {
-  maxPlaceholderWidth: 12,
-  maxPlaceholderHeight: 12,
+  maxPlaceholderWidth: 25,
+  maxPlaceholderHeight: 25,
   imgSelector: 'img',
   transformImgPath,
   className: ['lazyload'],
   cacheFile: '.lazyimages.json',
   appendInitScript: true,
   scriptSrc: 'https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js',
-  preferNativeLazyLoad: true,
+  preferNativeLazyLoad: false,
 };
 
 // A global to store the current config (saves us passing it around functions)
@@ -80,20 +88,21 @@ const getImageData = async (imageSrc) => {
   const width = metadata.width;
   const height = metadata.height;
 
-  const resized = await image
+  const lqip = await image
     .resize({
       width: maxPlaceholderWidth,
       height: maxPlaceholderHeight,
       fit: sharp.fit.inside,
     })
+    .blur()
     .toBuffer();
 
-  const encoded = resized.toString('base64');
+  const encodedLqip = lqip.toString('base64');
 
   imageData = {
     width,
     height,
-    src: `data:image/png;base64,${encoded}`,
+    src: `data:image/png;base64,${encodedLqip}`,
   };
 
   logMessage(`finished processing ${imageSrc}`);
@@ -102,15 +111,19 @@ const getImageData = async (imageSrc) => {
 };
 
 // Adds the attributes to the image element
-const processImage = async (imgElem) => {
-  const { transformImgPath, className } = lazyImagesConfig;
+const processImage = async (imgElem, outputPath) => {
+  const {
+    transformImgPath,
+    className,
+    preferNativeLazyLoad,
+  } = lazyImagesConfig;
 
   if (imgElem.src.startsWith('data:')) {
     logMessage('skipping image with data URI');
     return;
   }
 
-  const imgPath = transformImgPath(imgElem.src);
+  const imgPath = transformImgPath(imgElem.src, outputPath);
   const parsedUrl = url.parse(imgPath);
   let fileExt = path.extname(parsedUrl.pathname).substr(1);
 
@@ -119,7 +132,10 @@ const processImage = async (imgElem) => {
     fileExt = querystring.parse(parsedUrl.query).format;
   }
 
-  imgElem.setAttribute('loading', 'lazy');
+  if (preferNativeLazyLoad) {
+    imgElem.setAttribute('loading', 'lazy');
+  }
+
   imgElem.setAttribute('data-src', imgElem.src);
 
   const classNameArr = Array.isArray(className) ? className : [className];
@@ -138,9 +154,21 @@ const processImage = async (imgElem) => {
 
   try {
     const image = await getImageData(imgPath);
-    imgElem.setAttribute('width', image.width);
-    imgElem.setAttribute('height', image.height);
     imgElem.setAttribute('src', image.src);
+
+    const widthAttr = imgElem.getAttribute('width');
+    const heightAttr = imgElem.getAttribute('height');
+
+    if (!widthAttr && !heightAttr) {
+      imgElem.setAttribute('width', image.width);
+      imgElem.setAttribute('height', image.height);
+    } else if (widthAttr && !heightAttr) {
+      const ratioHeight = (image.height * widthAttr) / image.width;
+      imgElem.setAttribute('height', Math.round(ratioHeight));
+    } else if (heightAttr && !widthAttr) {
+      const ratioWidth = (image.width * heightAttr) / image.height;
+      imgElem.setAttribute('width', Math.round(ratioWidth));
+    }
   } catch (e) {
     console.error('LazyImages', imgPath, e);
   }
@@ -162,7 +190,7 @@ const transformMarkup = async (rawContent, outputPath) => {
 
     if (images.length > 0) {
       logMessage(`found ${images.length} images in ${outputPath}`);
-      await Promise.all(images.map(processImage));
+      await Promise.all(images.map((image) => processImage(image, outputPath)));
       logMessage(`processed ${images.length} images in ${outputPath}`);
 
       if (appendInitScript) {
