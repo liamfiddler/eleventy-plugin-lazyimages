@@ -28,7 +28,7 @@ This plugin supports:
 
 ---
 
-**Like this project? Buy me a coffee! [PayPal](https://paypal.me/liamfiddler) [ko-fi](https://ko-fi.com/liamfiddler)**
+**Like this project? Buy me a coffee via [PayPal](https://paypal.me/liamfiddler) or [ko-fi](https://ko-fi.com/liamfiddler)**
 
 ---
 
@@ -229,6 +229,6 @@ The API remains largely the same so most sites should not need to adjust their c
 
 ---
 
-**Like this project? Buy me a coffee! [PayPal](https://paypal.me/liamfiddler) [ko-fi](https://ko-fi.com/liamfiddler)**
+**Like this project? Buy me a coffee via [PayPal](https://paypal.me/liamfiddler) or [ko-fi](https://ko-fi.com/liamfiddler)**
 
 ---
