@@ -11,7 +11,6 @@ const {
   initScript,
   checkConfig,
 } = require('./helpers');
-const { dir } = require('console');
 
 // List of file extensions this plugin can handle (basically just what sharp supports)
 const supportedExtensions = [
@@ -112,12 +111,11 @@ const getImageData = async (imageSrc) => {
 };
 
 // Adds the attributes to the image element
-const processImage = async (imgElem, outputPath) => {
+const processImage = async (imgElem, options) => {
   const {
     transformImgPath,
     className,
     preferNativeLazyLoad,
-    outputDir,
   } = lazyImagesConfig;
 
   if (imgElem.src.startsWith('data:')) {
@@ -125,7 +123,7 @@ const processImage = async (imgElem, outputPath) => {
     return;
   }
 
-  const imgPath = transformImgPath(imgElem.src, outputPath, outputDir);
+  const imgPath = transformImgPath(imgElem.src, options);
   const parsedUrl = url.parse(imgPath);
   let fileExt = path.extname(parsedUrl.pathname).substr(1);
 
@@ -177,7 +175,7 @@ const processImage = async (imgElem, outputPath) => {
       imgElem.setAttribute('width', Math.round(ratioWidth));
     }
   } catch (e) {
-    console.error('LazyImages', imgPath, e);
+    logMessage(`${e.message}: ${imgPath}`);
   }
 };
 
@@ -197,7 +195,7 @@ const transformMarkup = async (rawContent, outputPath) => {
 
     if (images.length > 0) {
       logMessage(`found ${images.length} images in ${outputPath}`);
-      await Promise.all(images.map((image) => processImage(image, outputPath)));
+      await Promise.all(images.map((image) => processImage(image, { outputPath })));
       logMessage(`processed ${images.length} images in ${outputPath}`);
 
       if (appendInitScript) {
@@ -224,12 +222,9 @@ const transformMarkup = async (rawContent, outputPath) => {
 module.exports = {
   initArguments: {},
   configFunction: (eleventyConfig, pluginOptions = {}) => {
-    console.log(eleventyConfig);
-  
     lazyImagesConfig = {
       ...defaultLazyImagesConfig,
       ...pluginOptions,
-      outputDir: '_site',
     };
 
     checkConfig(lazyImagesConfig, defaultLazyImagesConfig);
