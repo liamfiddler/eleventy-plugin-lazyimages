@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <style>
+        body {
+          width: 100%;
+          max-width: 80%;
+          margin: 0 auto;
+          padding: 1rem;
+        }
+        img:not(.unstyled) {
+          display: block;
+          width: 100%;
+          max-width: 100%;
+          height: auto;
+        }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="/">Root Level</a>
+      | <a href="/nested1">Nested (image outside dir)</a>
+      | <a href="/nested2">Nested (image inside dir)</a>
+    </nav>
+    {{ content | safe }}
+  </body>
+</html>

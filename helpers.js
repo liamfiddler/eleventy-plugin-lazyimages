@@ -1,5 +1,19 @@
 // Ensures relative paths start in the project root
-exports.transformImgPath = (src) => {
+exports.transformImgPath = (src, outputPath, siteOutputDir) => {
+  if (
+    src.startsWith('./') ||
+    src.startsWith('../') ||
+    (!src.startsWith('/') &&
+      !src.startsWith('http://') &&
+      !src.startsWith('https://') &&
+      !src.startsWith('data:'))
+  ) {
+    const outputDir = outputPath.substring(0, outputPath.lastIndexOf('/') + 1);
+    const imgPath = (outputDir + src).replace(siteOutputDir, '');
+    console.log('transformImgPath', outputDir, imgPath, siteOutputDir);
+  }
+
+  // Reference files from the root project directory
   if (src.startsWith('/') && !src.startsWith('//')) {
     return `.${src}`;
   }

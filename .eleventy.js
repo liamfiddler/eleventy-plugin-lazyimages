@@ -11,6 +11,7 @@ const {
   initScript,
   checkConfig,
 } = require('./helpers');
+const { dir } = require('console');
 
 // List of file extensions this plugin can handle (basically just what sharp supports)
 const supportedExtensions = [
@@ -116,6 +117,7 @@ const processImage = async (imgElem, outputPath) => {
     transformImgPath,
     className,
     preferNativeLazyLoad,
+    outputDir,
   } = lazyImagesConfig;
 
   if (imgElem.src.startsWith('data:')) {
@@ -123,7 +125,7 @@ const processImage = async (imgElem, outputPath) => {
     return;
   }
 
-  const imgPath = transformImgPath(imgElem.src, outputPath);
+  const imgPath = transformImgPath(imgElem.src, outputPath, outputDir);
   const parsedUrl = url.parse(imgPath);
   let fileExt = path.extname(parsedUrl.pathname).substr(1);
 
@@ -222,11 +224,13 @@ const transformMarkup = async (rawContent, outputPath) => {
 module.exports = {
   initArguments: {},
   configFunction: (eleventyConfig, pluginOptions = {}) => {
-    lazyImagesConfig = Object.assign(
-      {},
-      defaultLazyImagesConfig,
-      pluginOptions
-    );
+    console.log(eleventyConfig);
+  
+    lazyImagesConfig = {
+      ...defaultLazyImagesConfig,
+      ...pluginOptions,
+      outputDir: '_site',
+    };
 
     checkConfig(lazyImagesConfig, defaultLazyImagesConfig);
     cache.load(lazyImagesConfig.cacheFile);
