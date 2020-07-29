@@ -24,7 +24,11 @@ This plugin supports:
 
 ---
 
-**Like this project? [Buy me a coffee!](https://ko-fi.com/liamfiddler)**
+**v2 just released! [View the release/upgrade notes](#upgrade-notes)**
+
+---
+
+**Like this project? Buy me a coffee! [PayPal](https://paypal.me/liamfiddler) [ko-fi](https://ko-fi.com/liamfiddler)**
 
 ---
 
@@ -123,7 +127,7 @@ This project welcomes suggestions and Pull Requests!
 
 ## Authors
 
-- **Liam Fiddler** - _Initial work_ - [@liamfiddler](https://github.com/liamfiddler)
+- **Liam Fiddler** - _Initial work / maintainer_ - [@liamfiddler](https://github.com/liamfiddler)
 
 See also the list of
 [contributors](https://github.com/liamfiddler/eleventy-plugin-lazyimages/contributors)
@@ -156,7 +160,7 @@ but you can specify a relative path via the `scriptSrc` configuration option.
 
 ### Does my local image path have to match the output path?
 
-**(a.k.a Why do I have "[Error: Input file is missing]" messages in my terminal?)**
+**(a.k.a Why do I have "Input file is missing" messages in my terminal?)**
 
 By default this plugin assumes the file referenced in a `src` attribute like
 `<img src="/images/dog.jpg" />` exists at `<project root>/images/dog.jpg` or
@@ -175,6 +179,10 @@ eleventyConfig.addPlugin(lazyImagesPlugin, {
   transformImgPath: (imgPath) => imgPath.replace('/images/', './assets/'),
 });
 ```
+
+(In the future we hope to make the plugin automatically manage these paths,
+once a fix for [eleventy/issues/789](https://github.com/11ty/eleventy/issues/789)
+is completed)
 
 ### Can I use a different lazy load script?
 
@@ -206,8 +214,21 @@ We've included an
 demonstrating this plugin with
 [eleventy-plugin-local-images](https://github.com/robb0wen/eleventy-plugin-local-images).
 
+## Upgrade notes
+
+### v2.0.0
+
+The underlying tool used to generate placeholders has switched from JIMP to Sharp.
+This allows the plugin to handle a greater variety of image formats, while also increasing in speed.
+
+The API remains largely the same so most sites should not need to adjust their config.
+
+- The default values for `maxPlaceholderWidth` and `maxPlaceholderHeight` have been increased from 12 to 25 - this increases the quality of the LQIP without a significant change in filesize
+- `placeholderQuality` has been removed - at the size of the LQIP it didn't make much of a difference to filesize or image quality
+- The default value for `preferNativeLazyLoad` is now `false` - most users install this plugin to generate LQIP and the previous default meant the LQIP weren't visible in modern browsers
+
 ---
 
-**Like this project? [Buy me a coffee!](https://ko-fi.com/liamfiddler)**
+**Like this project? Buy me a coffee! [PayPal](https://paypal.me/liamfiddler) [ko-fi](https://ko-fi.com/liamfiddler)**
 
 ---
