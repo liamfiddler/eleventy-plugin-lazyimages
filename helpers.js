@@ -1,5 +1,21 @@
 // Ensures relative paths start in the project root
-exports.transformImgPath = (src) => {
+exports.transformImgPath = (src, options = {}) => {
+  if (
+    src.startsWith('./') ||
+    src.startsWith('../') ||
+    (!src.startsWith('/') &&
+      !src.startsWith('http://') &&
+      !src.startsWith('https://') &&
+      !src.startsWith('data:'))
+  ) {
+    // The file path is relative to the output document
+    const { outputPath, inputPath } = options;
+    const outputDir = outputPath.substring(0, outputPath.lastIndexOf('/') + 1);
+    const imgPath = outputDir + src;
+    // TODO: Finish this when https://github.com/11ty/eleventy/issues/789 is resolved
+  }
+
+  // Reference files from the root project directory
   if (src.startsWith('/') && !src.startsWith('//')) {
     return `.${src}`;
   }
