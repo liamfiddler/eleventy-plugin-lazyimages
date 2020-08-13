@@ -7,6 +7,8 @@ title: Basic demo - eleventy-plugin-lazyimages
 This is a basic demo of
 [eleventy-plugin-lazyimages](https://github.com/liamfiddler/eleventy-plugin-lazyimages)
 
+[Nested directory](./nested)
+
 ## These images are from the local filesystem:
 
 ![Local Test](/img/test-01.png "Local Test")

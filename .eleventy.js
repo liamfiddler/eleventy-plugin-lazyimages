@@ -118,6 +118,10 @@ const processImage = async (imgElem, options) => {
     preferNativeLazyLoad,
   } = lazyImagesConfig;
 
+  if (preferNativeLazyLoad) {
+    imgElem.setAttribute('loading', 'lazy');
+  }
+
   if (imgElem.src.startsWith('data:')) {
     logMessage('skipping image with data URI');
     return;
@@ -132,8 +136,9 @@ const processImage = async (imgElem, options) => {
     fileExt = querystring.parse(parsedUrl.query).format;
   }
 
-  if (preferNativeLazyLoad) {
-    imgElem.setAttribute('loading', 'lazy');
+  if (!fileExt) {
+    logMessage('skipping image with missing file extension');
+    return;
   }
 
   imgElem.setAttribute('data-src', imgElem.src);
@@ -180,7 +185,7 @@ const processImage = async (imgElem, options) => {
 };
 
 // Scans the output HTML for images, processes them, & appends the init script
-const transformMarkup = async (rawContent, outputPath) => {
+async function transformMarkup(rawContent, outputPath) {
   const {
     imgSelector,
     appendInitScript,
@@ -193,9 +198,17 @@ const transformMarkup = async (rawContent, outputPath) => {
     const dom = new JSDOM(content);
     const images = [...dom.window.document.querySelectorAll(imgSelector)];
 
+    const params = {
+      outputPath,
+      outputDir: this.outputDir,
+      inputPath: this.inputPath,
+      inputDir: this.inputDir,
+      extraOutputSubdirectory: this.extraOutputSubdirectory,
+    };
+
     if (images.length > 0) {
       logMessage(`found ${images.length} images in ${outputPath}`);
-      await Promise.all(images.map((image) => processImage(image, { outputPath })));
+      await Promise.all(images.map((image) => processImage(image, params)));
       logMessage(`processed ${images.length} images in ${outputPath}`);
 
       if (appendInitScript) {
