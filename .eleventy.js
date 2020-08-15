@@ -129,7 +129,7 @@ const processImage = async (imgElem, options) => {
 
   if (!fileExt) {
     // Twitter and similar pass the file format in the querystring, e.g. "?format=jpg"
-    fileExt = querystring.parse(parsedUrl.query).format;
+    fileExt = querystring.parse(parsedUrl.query).format || querystring.parse(parsedUrl.query).fm;
   }
 
   if (preferNativeLazyLoad) {
