@@ -23,6 +23,8 @@ This is a basic demo of
 
 ## These images are from a third-party website:
 
+![No file extension](https://placekitten.com/200/300 "No file extension")
+
 <img srcset="https://live.staticflickr.com/3915/14746807980_875aa68823_c.jpg 800w, https://live.staticflickr.com/3915/14746807980_875aa68823_b.jpg 1024w, https://live.staticflickr.com/3915/14746807980_875aa68823_h.jpg 1600w" src="https://live.staticflickr.com/3915/14746807980_875aa68823_c.jpg">
 
 ![Test](https://live.staticflickr.com/7807/47291519341_1ceba19252_o.jpg "Test")
