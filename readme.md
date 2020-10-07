@@ -14,17 +14,18 @@ What this plugin does:
 This plugin supports:
 
 - Any 11ty template format that outputs to a .html file
-- Absolute and relative image paths
+- Absolute image paths
+- Relative image paths (improved in v2.1!)
 - Custom image selectors; target all images or only images in a certain part
   of the page
 - Placeholder generation for all image formats supported by
-  [Sharp](https://sharp.pixelplumbing.com/); JPEG, PNG, WebP, TIFF, GIF, & SVG
+  [Sharp](https://sharp.pixelplumbing.com/); including JPEG, PNG, WebP, TIFF, GIF, & SVG
 - Responsive images using `srcset`; the image in the `src` attribute will be
   used for determining the placeholder image and width/height attributes
 
 ---
 
-**v2 just released! [View the release/upgrade notes](#upgrade-notes)**
+**v2.1 just released! [View the release/upgrade notes](#upgrade-notes)**
 
 ---
 
@@ -91,18 +92,18 @@ and some common questions are covered at the end of this file.
 
 ## Configuration options
 
-| Key                    | Type     | Description                                                                                                                                                                   |
-| ---------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `maxPlaceholderWidth`  | Integer  | The maximum width in pixels of the generated placeholder image. Recommended values are between 15 and 40.<br>Default: `25`                                                    |
-| `maxPlaceholderHeight` | Integer  | The maximum height in pixels of the generated placeholder image. Recommended values are between 15 and 40.<br>Default: `25`                                                   |
-| `imgSelector`          | String   | The DOM selector used to find IMG elements in the markup.<br>Default: `img`                                                                                                   |
-| `transformImgPath`     | Function | A function that takes the IMG `src` attribute and returns a string representing the actual file path to your image.                                                           |
-| `cacheFile`            | String   | Cache image metadata and placeholder images to this filename. Greatly speeds up subsequent builds. Pass an empty string to turn off the cache.<br>Default: `.lazyimages.json` |
-| `appendInitScript`     | Boolean  | Appends code to initialise lazy loading of images to the generated markup. Set this to `false` if you include your own lazy load script.<br>Default: `true`                   |
-| `scriptSrc`            | String   | The URI for the lazy load script that is injected into the markup via `appendInitScript`.<br>Default: `https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js`             |
-| `preferNativeLazyLoad` | Boolean  | Use the native browser `loading="lazy"` instead of the lazy load script (if available).<br>Default: `false`                                                                   |
-| `setWidthAndHeightAttrs` | Boolean  | Set the `width` and `height` attributes on `img` elements to the actual size of the image file.<br>Default: `true`                                                                   |
-| `className`            | String[] | The class names added to found IMG elements. You usually don't need to change this unless you're using a different `scriptSrc`.<br>Default: `['lazyload']`                    |
+| Key                      | Type     | Description                                                                                                                                                                   |
+| ------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `maxPlaceholderWidth`    | Integer  | The maximum width in pixels of the generated placeholder image. Recommended values are between 15 and 40.<br>Default: `25`                                                    |
+| `maxPlaceholderHeight`   | Integer  | The maximum height in pixels of the generated placeholder image. Recommended values are between 15 and 40.<br>Default: `25`                                                   |
+| `imgSelector`            | String   | The DOM selector used to find IMG elements in the markup.<br>Default: `img`                                                                                                   |
+| `transformImgPath`       | Function | A function that takes the IMG `src` attribute and returns a string representing the actual file path to your image.                                                           |
+| `cacheFile`              | String   | Cache image metadata and placeholder images to this filename. Greatly speeds up subsequent builds. Pass an empty string to turn off the cache.<br>Default: `.lazyimages.json` |
+| `appendInitScript`       | Boolean  | Appends code to initialise lazy loading of images to the generated markup. Set this to `false` if you include your own lazy load script.<br>Default: `true`                   |
+| `scriptSrc`              | String   | The URI for the lazy load script that is injected into the markup via `appendInitScript`.<br>Default: `https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js`             |
+| `preferNativeLazyLoad`   | Boolean  | Use the native browser `loading="lazy"` instead of the lazy load script (if available).<br>Default: `false`                                                                   |
+| `setWidthAndHeightAttrs` | Boolean  | Set the `width` and `height` attributes on `img` elements to the actual size of the image file.<br>Default: `true`                                                            |
+| `className`              | String[] | The class names added to found IMG elements. You usually don't need to change this unless you're using a different `scriptSrc`.<br>Default: `['lazyload']`                    |
 
 ## Example projects
 
@@ -163,9 +164,13 @@ but you can specify a relative path via the `scriptSrc` configuration option.
 
 **(a.k.a Why do I have "Input file is missing" messages in my terminal?)**
 
-By default this plugin assumes the file referenced in a `src` attribute like
-`<img src="/images/dog.jpg" />` exists at `<project root>/images/dog.jpg` or
+By default this plugin will look for the file referenced in a `src` attribute like
+`<img src="/images/dog.jpg" />` at `<project root>/images/dog.jpg` or
 `<project root>/src/images/dog.jpg`.
+
+Whereas a file referenced like
+`<img src="./images/dog.jpg" />` or `<img src="images/dog.jpg" />` is expected to
+be found at `<input file directory>/images/dog.jpg`.
 
 If you prefer to store your images elsewhere the `transformImgPath` config
 option allows you to specify a function that points the plugin to your
@@ -181,9 +186,14 @@ eleventyConfig.addPlugin(lazyImagesPlugin, {
 });
 ```
 
-(In the future we hope to make the plugin automatically manage these paths,
-once a fix for [eleventy/issues/789](https://github.com/11ty/eleventy/issues/789)
-is completed)
+The `transformImgPath` configuration option takes a function that receives two
+parameters; `src`, and `options`.
+
+`src` is a string containing the value of the `img` elements `src` attribute.
+
+`options` is an object containing the `outputPath` of the file being processed,
+as well as the `outputDir`, `inputPath`, `inputDir`, and
+`extraOutputSubdirectory` values from eleventy config.
 
 ### Can I use a different lazy load script?
 
@@ -216,6 +226,17 @@ demonstrating this plugin with
 [eleventy-plugin-local-images](https://github.com/robb0wen/eleventy-plugin-local-images).
 
 ## Upgrade notes
+
+### v2.1.0
+
+This release improves support for relative file paths in `src` attributes.
+
+`transformImgPath` now receives an optional second parameter containing the `outputPath`
+of the file being processed, as well as the `outputDir`, `inputPath`, `inputDir`, and
+`extraOutputSubdirectory` values from eleventy config.
+
+This release also adds the `setWidthAndHeightAttrs` config option which allows you to turn
+off the setting of `width` and `height` attributes being added to `img` elements.
 
 ### v2.0.0
 
