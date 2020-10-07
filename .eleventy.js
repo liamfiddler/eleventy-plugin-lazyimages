@@ -12,17 +12,6 @@ const {
   checkConfig,
 } = require('./helpers');
 
-// List of file extensions this plugin can handle (basically just what sharp supports)
-const supportedExtensions = [
-  'jpg',
-  'jpeg',
-  'gif',
-  'png',
-  'webp',
-  'svg',
-  'tiff',
-];
-
 // The default values for the plugin
 const defaultLazyImagesConfig = {
   maxPlaceholderWidth: 25,
@@ -34,6 +23,7 @@ const defaultLazyImagesConfig = {
   appendInitScript: true,
   scriptSrc: 'https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js',
   preferNativeLazyLoad: false,
+  setWidthAndHeightAttrs: true,
 };
 
 // A global to store the current config (saves us passing it around functions)
@@ -116,6 +106,7 @@ const processImage = async (imgElem, options) => {
     transformImgPath,
     className,
     preferNativeLazyLoad,
+    setWidthAndHeightAttrs,
   } = lazyImagesConfig;
 
   if (preferNativeLazyLoad) {
@@ -136,11 +127,6 @@ const processImage = async (imgElem, options) => {
     fileExt = querystring.parse(parsedUrl.query).format;
   }
 
-  if (!fileExt) {
-    logMessage('skipping image with missing file extension');
-    return;
-  }
-
   imgElem.setAttribute('data-src', imgElem.src);
 
   const classNameArr = Array.isArray(className) ? className : [className];
@@ -152,17 +138,11 @@ const processImage = async (imgElem, options) => {
     imgElem.removeAttribute('srcset');
   }
 
-  if (!supportedExtensions.includes(fileExt.toLowerCase())) {
-    logMessage(`${fileExt} placeholder not supported: ${imgPath}`);
-    return;
-  }
-
   try {
     const image = await getImageData(imgPath);
     imgElem.setAttribute('src', image.src);
 
-    // Don't set width/height for vector images
-    if (fileExt === 'svg') {
+    if (!setWidthAndHeightAttrs || fileExt === 'svg') {
       return;
     }
 
