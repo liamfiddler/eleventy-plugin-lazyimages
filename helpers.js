@@ -1,3 +1,5 @@
+const path = require('path');
+
 // Ensures relative paths start in the project root
 exports.transformImgPath = (src, options = {}) => {
   if (
@@ -9,10 +11,8 @@ exports.transformImgPath = (src, options = {}) => {
       !src.startsWith('data:'))
   ) {
     // The file path is relative to the output document
-    const { outputPath, inputPath } = options;
-    const outputDir = outputPath.substring(0, outputPath.lastIndexOf('/') + 1);
-    const imgPath = outputDir + src;
-    // TODO: Finish this when https://github.com/11ty/eleventy/issues/789 is resolved
+    const outputDir = path.posix.parse(options.inputPath).dir;
+    return path.posix.normalize(outputDir + '/' + src);
   }
 
   // Reference files from the root project directory
