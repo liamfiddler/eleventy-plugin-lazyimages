@@ -1,6 +1,6 @@
 {
   "name": "eleventy-plugin-lazyimages",
-  "version": "1.1.2",
+  "version": "2.0.1",
   "description": "An 11ty plugin that adds lazy loading to your images",
   "main": ".eleventy.js",
   "scripts": {
@@ -25,7 +25,8 @@
   },
   "homepage": "https://github.com/liamfiddler/eleventy-plugin-lazyimages#readme",
   "dependencies": {
-    "jimp": "^0.9.5",
-    "jsdom": "^16.2.1"
+    "jsdom": "^16.2.2",
+    "node-fetch": "^2.6.0",
+    "sharp": "^0.25.3"
   }
 }

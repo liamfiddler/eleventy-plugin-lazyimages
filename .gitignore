@@ -63,3 +63,5 @@ _site
 
 # other junk
 .DS_Store
+example/**/package-lock.json
+example/**/.lazyimages.json

@@ -7,17 +7,23 @@ title: Basic demo - eleventy-plugin-lazyimages
 This is a basic demo of
 [eleventy-plugin-lazyimages](https://github.com/liamfiddler/eleventy-plugin-lazyimages)
 
+[Nested directory](./nested)
+
 ## These images are from the local filesystem:
 
 ![Local Test](/img/test-01.png "Local Test")
 
-![Local Test](/img/test-02.jpg "Local Test")
+<img src="/img/test-02.jpg" width="100" alt="Local Test with width attr" class="unstyled">
+
+<img src="/img/test-02.jpg" height="50" alt="Local Test with height attr" class="unstyled">
 
 ![Local Test](/img/test-03.jpg "Local Test")
 
 ![Transparent Local Test](/img/transparent.png "Transparent Local Test")
 
 ## These images are from a third-party website:
+
+![No file extension](https://placekitten.com/200/300 "No file extension")
 
 <img srcset="https://live.staticflickr.com/3915/14746807980_875aa68823_c.jpg 800w, https://live.staticflickr.com/3915/14746807980_875aa68823_b.jpg 1024w, https://live.staticflickr.com/3915/14746807980_875aa68823_h.jpg 1600w" src="https://live.staticflickr.com/3915/14746807980_875aa68823_c.jpg">
 
