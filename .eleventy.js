@@ -12,17 +12,6 @@ const {
   checkConfig,
 } = require('./helpers');
 
-// List of file extensions this plugin can handle (basically just what sharp supports)
-const supportedExtensions = [
-  'jpg',
-  'jpeg',
-  'gif',
-  'png',
-  'webp',
-  'svg',
-  'tiff',
-];
-
 // The default values for the plugin
 const defaultLazyImagesConfig = {
   maxPlaceholderWidth: 25,
@@ -34,6 +23,7 @@ const defaultLazyImagesConfig = {
   appendInitScript: true,
   scriptSrc: 'https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js',
   preferNativeLazyLoad: false,
+  setWidthAndHeightAttrs: true,
 };
 
 // A global to store the current config (saves us passing it around functions)
@@ -116,7 +106,12 @@ const processImage = async (imgElem, options) => {
     transformImgPath,
     className,
     preferNativeLazyLoad,
+    setWidthAndHeightAttrs,
   } = lazyImagesConfig;
+
+  if (preferNativeLazyLoad) {
+    imgElem.setAttribute('loading', 'lazy');
+  }
 
   if (imgElem.src.startsWith('data:')) {
     logMessage('skipping image with data URI');
@@ -132,10 +127,6 @@ const processImage = async (imgElem, options) => {
     fileExt = querystring.parse(parsedUrl.query).format || querystring.parse(parsedUrl.query).fm;
   }
 
-  if (preferNativeLazyLoad) {
-    imgElem.setAttribute('loading', 'lazy');
-  }
-
   imgElem.setAttribute('data-src', imgElem.src);
 
   const classNameArr = Array.isArray(className) ? className : [className];
@@ -147,17 +138,11 @@ const processImage = async (imgElem, options) => {
     imgElem.removeAttribute('srcset');
   }
 
-  if (!supportedExtensions.includes(fileExt.toLowerCase())) {
-    logMessage(`${fileExt} placeholder not supported: ${imgPath}`);
-    return;
-  }
-
   try {
     const image = await getImageData(imgPath);
     imgElem.setAttribute('src', image.src);
 
-    // Don't set width/height for vector images
-    if (fileExt === 'svg') {
+    if (!setWidthAndHeightAttrs || fileExt === 'svg') {
       return;
     }
 
@@ -180,7 +165,7 @@ const processImage = async (imgElem, options) => {
 };
 
 // Scans the output HTML for images, processes them, & appends the init script
-const transformMarkup = async (rawContent, outputPath) => {
+async function transformMarkup(rawContent, outputPath) {
   const {
     imgSelector,
     appendInitScript,
@@ -193,9 +178,17 @@ const transformMarkup = async (rawContent, outputPath) => {
     const dom = new JSDOM(content);
     const images = [...dom.window.document.querySelectorAll(imgSelector)];
 
+    const params = {
+      outputPath,
+      outputDir: this.outputDir,
+      inputPath: this.inputPath,
+      inputDir: this.inputDir,
+      extraOutputSubdirectory: this.extraOutputSubdirectory,
+    };
+
     if (images.length > 0) {
       logMessage(`found ${images.length} images in ${outputPath}`);
-      await Promise.all(images.map((image) => processImage(image, { outputPath })));
+      await Promise.all(images.map((image) => processImage(image, params)));
       logMessage(`processed ${images.length} images in ${outputPath}`);
 
       if (appendInitScript) {
