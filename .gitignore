@@ -65,3 +65,4 @@ _site
 .DS_Store
 example/**/package-lock.json
 example/**/.lazyimages.json
+/.vscode
