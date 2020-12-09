@@ -24,7 +24,7 @@ const defaultLazyImagesConfig = {
   scriptSrc: 'https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js',
   preferNativeLazyLoad: false,
   setWidthAndHeightAttrs: true,
-  addNoScript: true,
+  addNoScript: false,
 };
 
 // A global to store the current config (saves us passing it around functions)
@@ -194,8 +194,10 @@ async function transformMarkup(rawContent, outputPath) {
       Array.from(dom.window.document.getElementsByTagName('img')).forEach(
         (image) => {
           const wrapper = dom.window.document.createElement('noscript');
+          wrapper.classList.add("nojs-image");
           wrapper.innerHTML = image.outerHTML;
           image.parentNode.insertBefore(wrapper, image);
+          wrapper.nextSibling.classList.add("js-image");
         }
       );
     }
