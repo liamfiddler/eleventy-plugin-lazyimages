@@ -27,6 +27,6 @@
   "dependencies": {
     "jsdom": "^16.2.2",
     "node-fetch": "^2.6.0",
-    "sharp": "^0.25.3"
+    "sharp": "^0.26.3"
   }
 }
