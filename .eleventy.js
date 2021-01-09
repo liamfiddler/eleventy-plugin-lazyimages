@@ -191,15 +191,13 @@ async function transformMarkup(rawContent, outputPath) {
     };
 
     if (addNoScript) {
-      Array.from(dom.window.document.getElementsByTagName('img')).forEach(
-        (image) => {
-          const wrapper = dom.window.document.createElement('noscript');
-          wrapper.classList.add("nojs-image");
-          wrapper.innerHTML = image.outerHTML;
-          image.parentNode.insertBefore(wrapper, image);
-          wrapper.nextSibling.classList.add("js-image");
-        }
-      );
+      Array.from(images).forEach((image) => {
+        const wrapper = dom.window.document.createElement('noscript');
+        wrapper.classList.add('nojs-image');
+        wrapper.innerHTML = image.outerHTML;
+        image.parentNode.insertBefore(wrapper, image);
+        wrapper.nextSibling.classList.add('js-image');
+      });
     }
 
     if (images.length > 0) {
