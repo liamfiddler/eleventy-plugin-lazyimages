@@ -24,6 +24,7 @@ const defaultLazyImagesConfig = {
   scriptSrc: 'https://cdn.jsdelivr.net/npm/lazysizes@5/lazysizes.min.js',
   preferNativeLazyLoad: false,
   setWidthAndHeightAttrs: true,
+  addNoScript: false,
 };
 
 // A global to store the current config (saves us passing it around functions)
@@ -124,7 +125,9 @@ const processImage = async (imgElem, options) => {
 
   if (!fileExt) {
     // Twitter and similar pass the file format in the querystring, e.g. "?format=jpg"
-    fileExt = querystring.parse(parsedUrl.query).format || querystring.parse(parsedUrl.query).fm;
+    fileExt =
+      querystring.parse(parsedUrl.query).format ||
+      querystring.parse(parsedUrl.query).fm;
   }
 
   imgElem.setAttribute('data-src', imgElem.src);
@@ -171,6 +174,7 @@ async function transformMarkup(rawContent, outputPath) {
     appendInitScript,
     scriptSrc,
     preferNativeLazyLoad,
+    addNoScript,
   } = lazyImagesConfig;
   let content = rawContent;
 
@@ -185,6 +189,16 @@ async function transformMarkup(rawContent, outputPath) {
       inputDir: this.inputDir,
       extraOutputSubdirectory: this.extraOutputSubdirectory,
     };
+
+    if (addNoScript) {
+      Array.from(images).forEach((image) => {
+        const wrapper = dom.window.document.createElement('noscript');
+        wrapper.classList.add('nojs-image');
+        wrapper.innerHTML = image.outerHTML;
+        image.parentNode.insertBefore(wrapper, image);
+        wrapper.nextSibling.classList.add('js-image');
+      });
+    }
 
     if (images.length > 0) {
       logMessage(`found ${images.length} images in ${outputPath}`);
@@ -209,7 +223,7 @@ async function transformMarkup(rawContent, outputPath) {
   }
 
   return content;
-};
+}
 
 // Export as 11ty plugin
 module.exports = {
