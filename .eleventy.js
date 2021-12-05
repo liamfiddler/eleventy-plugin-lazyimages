@@ -3,7 +3,7 @@ const querystring = require('querystring');
 const path = require('path');
 const { JSDOM } = require('jsdom');
 const sharp = require('sharp');
-const fetch = require('node-fetch');
+const fetch = require('cross-fetch');
 const cache = require('./cache');
 const {
   transformImgPath,
