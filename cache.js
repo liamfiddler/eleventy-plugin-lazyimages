@@ -37,7 +37,7 @@ exports.update = (cacheFile, imageSrc, imageData) => {
 
     fs.writeFile(cacheFile, cacheData, (err) => {
       if (err) {
-        console.error('LazyImages - cacheFile', e);
+        console.error('LazyImages - cacheFile', err);
       }
     });
   }
