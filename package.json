@@ -13,6 +13,7 @@
   "keywords": [
     "11ty",
     "eleventy",
+    "eleventy-plugin",
     "plugin",
     "lazy",
     "lazyload",
